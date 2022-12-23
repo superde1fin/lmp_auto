@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#Color codes abbreviations
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+GREEN='\033[0;32m'
+
+echo -e "\nStarting the configuration of the Lammps Automator\n"
+#Check all the requirements
+#Python3
+echo -e "Checking all the requirements...\n"
+all_reqs=true
+if ! command -v python3 &> /dev/null
+then
+	python2_version="$(python2 -V 2>&1)"
+	echo -e "${RED}ERROR: Python3 not found. \u2716${NC}\nLatest version of python is $python2_version\nPlease install python3\n"
+	all_reqs=false
+	unset python2_version
+else
+	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
+fi
+
+#pip3
+if ! command -v pip3 &> /dev/null
+then
+	pip_version="$(pip -V 2>&1)"
+	echo -e "${RED}ERROR: pip3 not found. \u2716${NC}\nLatest version of pip is $pip_version\nPlease install pip3\n"
+	all_reqs=false
+	unset pip_version
+else
+	echo -e "${GREEN}Found $(pip3 --version) \u2714${NC}\n"
+fi
+
+#Check that all of the requirements have been satisfied
+if ! $all_reqs
+then
+	echo -e "${RED}Some of the requirements have not been satisfied\nPlease install them and rerun this configuration script${NC}\n"
+else
+	echo -e "${GREEN}All of the requriments are satisfied. Starting to build the binary files.${NC}\n"
+fi
