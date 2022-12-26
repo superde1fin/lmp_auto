@@ -54,7 +54,18 @@ else
 	echo -e "${GREEN}All of the requriments are satisfied. Starting to build the binary files.${NC}\n"
 fi
 
-python3 -m nuitka --follow-imports lmp_auto.py 
+#Compile python files
+if ls | grep -qF "lmp_auto.py"
+then
+	python3 -m nuitka --follow-imports lmp_auto.py 
+else
+	if ls ../ | grep -qF "lmp_auto.py"
+	then
+		python3 -m nuitka --follow-imports ../lmp_auto.py 
+	else
+		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build/project folder.\n"
+	fi
+fi
 
 if ls | grep -qF "lmp_auto.bin"
 then
@@ -64,6 +75,7 @@ then
 		PATH=$PATH:/usr/local/bin
 	fi
 	cp lmp_auto.bin /usr/local/bin/lmp_auto
+	echo -e "${GREEN}Lammps Auto has been successfully installed!${NC}\n" 
 else
 	echo -e "\n${RED}Something went wrong wile creating a binary file.${NC}\nPlease check for Nuitka errors.\n"
 fi
