@@ -66,29 +66,79 @@ else
 fi
 
 #Compile python files
-if ls | grep -qF "lmp_auto.py"
-then
-	python3 -m nuitka --follow-imports lmp_auto.py 
-else
-	if ls ../ | grep -qF "lmp_auto.py"
-	then
-		python3 -m nuitka --follow-imports ../lmp_auto.py 
-	else
-		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build/project folder.\n"
-	fi
-fi
+#if ls | grep -qF "lmp_auto.py"
+#then
+#	python3 -m nuitka --follow-imports lmp_auto.py 
+#else
+#	if ls ../ | grep -qF "lmp_auto.py"
+#	then
+#		python3 -m nuitka --follow-imports ../lmp_auto.py 
+#	else
+#		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build/project folder.\n"
+#	fi
+#fi
 
 if ls | grep -qF "lmp_auto.bin"
 then
 	echo -e "${GREEN}The binary file has been successfully created.${NC}\n"
-	if echo $PATH | grep -qE '(:|^)/usr/local/bin:'
+	inst_path="/usr/local/bin/"
+	new_path=false
+	#Scan the command line arguments
+	for i in "$@"; do
+	  case $i in
+		-p=*|--prefix=*)
+		  inst_path="${i#*=}"
+		  new_path=true
+	  	    shift;;
+		-*|--*)
+		  echo -e "${RED}Unknown Argument: $i${NC}\n"
+		  exit 1;;
+		*)
+		  ;;
+	  esac
+	done
+
+	if ! $new_path
 	then
-		PATH=$PATH:/usr/local/bin
+		echo -e "You have not specified an installation directory.\nThe binary will be installed in $inst_path\n"
+	else
+		echo -e "The installation directory: $inst_path\n"
 	fi
-	cp lmp_auto.bin /usr/local/bin/lmp_auto
+
+
+	inst_path="${inst_path/\~/$HOME}"
+	if [ -d "$inst_path" ]
+	then
+		echo -e "${GREEN}Installation directory exists.${NC}\n"	
+	else
+		while true; do
+				read -p "$(echo -e "${RED}Installation directory $inst_path not found.${NC} Would you like to create one? ")" yn
+		    case $yn in
+	       		[Yy]* ) sudo mkdir -p $inst_path; break;;
+			 	[Nn]* ) exit;;
+	    	    * ) echo "Please answer yes or no.";;
+			esac
+		done
+	fi
+
+	if echo $PATH | grep -qE "(:|^)${inst_path}:"
+	then
+		
+		while true; do
+				read -p "$(echo -e "Directory $inst_path is not int the \$PATH. Would you like to add it?")" yn
+		    case $yn in
+	       		[Yy]* ) PATH=$PATH:/usr/local/bin; break;;
+			 	[Nn]* ) exit;;
+	    	    * ) echo "Please answer yes or no.";;
+			esac
+		done
+	fi
+	sudo cp lmp_auto.bin $inst_path/lmp_auto
+	
 	echo -e "${GREEN}Lammps Auto has been successfully installed!${NC}\n" 
+
 else
-	echo -e "\n${RED}Something went wrong wile creating a binary file.${NC}\nPlease check for Nuitka errors.\n"
+	echo -e "${RED}Something went wrong wile creating a binary file.${NC}\nPlease check for Nuitka errors.\n"
 fi
 
 
