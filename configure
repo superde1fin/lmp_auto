@@ -45,6 +45,17 @@ else
 	unset nuitka_version
 fi
 
+#numpy
+if ! pip3 list | grep -F "numpy" &> /dev/null
+then
+	echo -e "${RED}ERROR: Python module numpy not found. \u2716${NC}\n"
+	all_reqs=false
+else
+	numpy_version="$(pip3 list | grep -F "numpy")"
+	echo -e "${GREEN}Found $numpy_version \u2714${NC}\n"
+	unset numpy_version
+fi
+
 #Check that all of the requirements have been satisfied
 if ! $all_reqs
 then
