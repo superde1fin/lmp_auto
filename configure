@@ -134,7 +134,7 @@ then
 else
 	if [ -f "../lmp_auto.py" ]
 	then
-		python3 -m nuitka --follow-imports ../lmp_auto.py 
+		sudo python3 -m nuitka --follow-imports ../lmp_auto.py 
 	else
 		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build/project folder.\n"
 	fi
