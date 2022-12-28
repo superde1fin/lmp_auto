@@ -1,0 +1,16 @@
+This directory contains all necessary files for the Lammps Automator application.
+
+One can use the full potential of lmp_auto without compiling the python code into a binary, however, for a simpler and more conveniet use a config file is provided to automate such compilation.
+
+
+Use without installation (compilation):
+
+1. Navigate to a folder with lmp_auto project
+2. Use the lmp_auto.py file with a python3 interpriter: pytohn3 lmp_auto.py -h
+
+Use with installation (preferred):
+
+1. Navigate to a folder with lmp_auto project
+2. Create a build directory by executing: mkdir build && cd build
+3. Run the configuration file: ../configure -prefix=/path/to/installation
+4. Use the lmp_auto binary: lmp_auto.py (make sure the installation directory is in your $PATH variable by executing: echo $PATH
