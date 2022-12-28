@@ -128,7 +128,6 @@ else
 fi
 
 #Compile python files
-if ls | grep -qF "lmp_auto.py"
 if [ -f "lmp_auto.py" ]
 then
 	python3 -m nuitka --follow-imports lmp_auto.py 
