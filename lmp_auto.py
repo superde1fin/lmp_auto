@@ -99,11 +99,11 @@ def generator_attributes_assignment(args):
 def main():
     #Creating a main console application parser
     parser = argparse.ArgumentParser(
-                                                                                "create_data.py",
-                                                                                description = "This python script allows you to generate lammps initial datafile that includes a basic header and atom positions in a rectangular region.",
+                                                                                "lmp_auto.py",
+                                                                                description = "This application is an unofficial LAMMPS addon that helps to create necessary initial datafiles, modify existing structures, and keep a record of your project.",
                                                                                 epilog = "This code was created by the researchers at Alfred University Glass Labs and based on the code provided by the Mauro Glass Group.",
-                                                                                usage = "./create_data {mode} {-p/--parameter} {argument}")
-    #Creating a subparsers group "mode" to allow a user to switch between generation and logging
+                                                                                usage = "lmp_auto {mode} {-p/--parameter} {argument}")
+    #Creating a subparsers group "mode" to allow a user to switch between generation, logging, and modifying
     subparsers =   parser.add_subparsers(help = "Mode of data creator operation", dest = "mode")
     
     #Setting up generator arguments
