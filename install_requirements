@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if command -v apt > /dev/null
+then
+	inst_manager="apt"
+elif command -v yum > /dev/null
+then
+	inst_manager="yum"
+elif command -v brew > /dev/null
+then
+	inst_manager="brew"
+else
+	echo -e "No installation manager found, please install the requirements by hand.\n"
+	exit
+fi
+
+if [[ "$*" == *"python3"* ]]
+then
+	echo -e "Python3 is not installed...\nStarting installation\n"
+	sudo $inst_manager install python3
+fi
+
+if [[ "$*" == *"pip3"* ]]
+then
+	echo -e "pip3 is not installed...\nStarting installation\n"
+	sudo $inst_manager install python3-pip
+fi
+
+pip3 install -r requirements.txt
+
+

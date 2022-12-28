@@ -5,11 +5,48 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 GREEN='\033[0;32m'
 
+#Read an answer from user
+function read_answer(){
+	while true; do
+			read -p "$(echo -e "$1")" yn
+		case $yn in
+			[Yy]* ) answer=true; break;;
+			[Nn]* ) answer=false; break;;
+			* ) echo "Please answer yes or no.";;
+		esac
+	done
+	echo $answer
+}
+
+inst_path="/usr/local/bin/"
+new_path=false
+install_missing=false
+#Scan the command line arguments
+for i in "$@"; do
+  case $i in
+	-p=*|--prefix=*)
+	  inst_path="${i#*=}"
+	  new_path=true
+		shift;;
+	-i=*|--install-missing=*)
+		install_missing="${i#*=}"
+		shift;;
+	-*|--*)
+	  echo -e "${RED}Unknown Argument: $i${NC}\n"
+	  exit 1;;
+	*)
+	  ;;
+  esac
+done
+
 echo -e "\nStarting the configuration of the Lammps Automator\n"
 #Check all the requirements
-#Python3
+
 echo -e "Checking all the requirements...\n"
-all_reqs=true
+
+declare -a missing_reqs=()
+
+#Python3
 if ! command -v python3 &> /dev/null
 then
 	if ! command -v python2 &> /dev/null
@@ -18,9 +55,9 @@ then
 	else
 		python2_version=$(python2 -V 2>&1)
 		echo -e "${RED}ERROR: Python3 not found. \u2716${NC}\nLatest version of python is $python2_version\nPlease install python3\n"
-		all_reqs=false
 		unset python2_version
 	fi
+	missing_reqs+=("python3")
 else
 	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
 fi
@@ -29,16 +66,17 @@ fi
 if ! command -v pip3 &> /dev/null
 then
 	echo -e "${RED}ERROR: pip3 not found. \u2716${NC}\n"
-	all_reqs=false
+	missing_reqs+=("pip3")
 else
 	echo -e "${GREEN}Found $(pip3 --version) \u2714${NC}\n"
 fi
 
 #Nuitka
 if ! pip3 list | grep -F "Nuitka" &> /dev/null
+
 then
 	echo -e "${RED}ERROR: Python module Nuitka not found. \u2716${NC}\n"
-	all_reqs=false
+	missing_reqs+=("nuitka")
 else
 	nuitka_version="$(pip3 list | grep -F "Nuitka")"
 	echo -e "${GREEN}Found $nuitka_version \u2714${NC}\n"
@@ -49,7 +87,7 @@ fi
 if ! pip3 list | grep -F "numpy" &> /dev/null
 then
 	echo -e "${RED}ERROR: Python module numpy not found. \u2716${NC}\n"
-	all_reqs=false
+	missing_reqs+=("numpy")
 else
 	numpy_version="$(pip3 list | grep -F "numpy")"
 	echo -e "${GREEN}Found $numpy_version \u2714${NC}\n"
@@ -57,20 +95,45 @@ else
 fi
 
 #Check that all of the requirements have been satisfied
-if ! $all_reqs
+if (( ${#missing_reqs[@]} > 0 ))
 then
-	echo -e "${RED}Some of the requirements have not been satisfied\nPlease install them and rerun this configuration script${NC}\n"
-	exit
+	echo -e "${RED}Some of the requirements have not been satisfied\nPlease install them and rerun this configuration script${NC}"
+	echo -e "Missing requirements: ${missing_reqs[*]}\n"
+	
+	if ! $install_missing
+	then
+		if $( read_answer "Would you like to install the missing requirements?" )
+		then
+			install_missing=true
+		fi
+	fi
+	if $install_missing
+	then
+		echo -e "Starting the requirements' installation tool\n"
+		if [ -f "install_requirements" ]
+		then
+			./install_requirements "{$missing_reqs[*]}"
+		elif [ -f "../install_requirements"]
+		then
+			../install_requirements "{$missing_reqs[*]}"
+		else
+			echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+		exit
+		fi
+	else
+		exit
+	fi
 else
 	echo -e "${GREEN}All of the requriments are satisfied. Starting to build the binary files.${NC}\n"
 fi
 
 #Compile python files
 if ls | grep -qF "lmp_auto.py"
+if [ -f "lmp_auto.py" ]
 then
 	python3 -m nuitka --follow-imports lmp_auto.py 
 else
-	if ls ../ | grep -qF "lmp_auto.py"
+	if [ -f "../lmp_auto.py" ]
 	then
 		python3 -m nuitka --follow-imports ../lmp_auto.py 
 	else
@@ -78,25 +141,9 @@ else
 	fi
 fi
 
-if ls | grep -qF "lmp_auto.bin"
+if [ -f "lmp_auto.bin" ]
 then
 	echo -e "${GREEN}The binary file has been successfully created.${NC}\n"
-	inst_path="/usr/local/bin/"
-	new_path=false
-	#Scan the command line arguments
-	for i in "$@"; do
-	  case $i in
-		-p=*|--prefix=*)
-		  inst_path="${i#*=}"
-		  new_path=true
-	  	    shift;;
-		-*|--*)
-		  echo -e "${RED}Unknown Argument: $i${NC}\n"
-		  exit 1;;
-		*)
-		  ;;
-	  esac
-	done
 
 	if ! $new_path
 	then
@@ -111,27 +158,20 @@ then
 	then
 		echo -e "${GREEN}Installation directory exists.${NC}\n"	
 	else
-		while true; do
-				read -p "$(echo -e "${RED}Installation directory $inst_path not found.${NC} Would you like to create one? ")" yn
-		    case $yn in
-	       		[Yy]* ) sudo mkdir -p $inst_path; break;;
-			 	[Nn]* ) exit;;
-	    	    * ) echo "Please answer yes or no.";;
-			esac
-		done
+		if $( read_answer "$(echo -e "${RED}Installation directory $inst_path not found.${NC} Would you like to create one?")" )
+		then
+			sudo mkdir -p $inst_path
+		else
+			exit
+		fi
 	fi
 
-	if echo $PATH | grep -qE "(:|^)${inst_path}:"
+	if [ -z $(echo $PATH | grep -E "(:|^)${inst_path%/}:") ]
 	then
-		
-		while true; do
-				read -p "$(echo -e "Directory $inst_path is not int the \$PATH. Would you like to add it?")" yn
-		    case $yn in
-	       		[Yy]* ) PATH=$PATH:/usr/local/bin; break;;
-			 	[Nn]* ) exit;;
-	    	    * ) echo "Please answer yes or no.";;
-			esac
-		done
+		if $( read_answer "$(echo -e "Directory $inst_path is not int the \$PATH. Would you like to add it?")" )
+		then
+			echo PATH=$PATH:$inst_path >> ~/.bashrc
+		fi
 	fi
 	sudo cp lmp_auto.bin $inst_path/lmp_auto
 	
