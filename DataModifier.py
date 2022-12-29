@@ -142,6 +142,10 @@ class DataModifier:
             
         velocity_dict = self.get_velocity_dict()
         #print('\n'.join([f"{key} :: {value}" for key, value in velocity_dict.items()]))
+        if velocity_dict:
+            modifying_vel = True
+        else:
+            modifying_vel = False
             
         new_lines = []
         new_velocities = ["Velocities\n"]
@@ -152,14 +156,18 @@ class DataModifier:
             coords = list(map(float, split_ln[3:6]))
             if not bounder(region_def = region_def, coords = coords, origin = origin):
                 new_lines.append(line)
-                new_velocities.append(' '.join(velocity_dict[atom_id]))
+                if modifying_vel:
+                    new_velocities.append(' '.join(velocity_dict[atom_id]))
                 ctr += 1
 
         self.modify_atom_number(ctr)
         
         self.header = self.header.replace('\n', "\n#Cut made\n", 1)
         
-        self.write_to_file(self.header, '\n'.join(new_lines), '\n' + '\n'.join(new_velocities))
+        if modifying_vel:
+            self.write_to_file(self.header, '\n'.join(new_lines), '\n' + '\n'.join(new_velocities))
+        else:
+            self.write_to_file(self.header, '\n'.join(new_lines),"")
         lg = Logger.Logger()
         lg.write_line(["ML", "Hole Cutout", f"Modified File: {self.file}", f"Cut Shape: {shape}", f"Hole Center: {tuple([round(coord, 3) for coord in origin])}", f"Region Definition: {region_def}"])
     
@@ -225,6 +233,10 @@ class DataModifier:
         
         
         velocity_dict = self.get_velocity_dict()
+        if velocity_dict:
+            modifying_vel = True
+        else:
+            modifying_vel = False
             
         self.set_coords(coords = ((self.coords[0][1] + space_between)*scale[0], (self.coords[1][1] + space_between)*scale[1], (self.coords[2][1] + space_between)*scale[2]))
         atoms_num = 0
@@ -244,15 +256,18 @@ class DataModifier:
                         coords[2] = str(coords[2] + (self.coords[2][1] + space_between)*z)
                         splitted = splitted[:3] + coords + splitted[6:]
                         new_lines += (' '.join(splitted) + '\n')
-                    
-                        vel_line = velocity_dict[atom_key]
-                        vel_line[0] = str(atoms_num)
-                        new_velocities += (' '.join(vel_line) + '\n')
+                        if modifying_vel: 
+                            vel_line = velocity_dict[atom_key]
+                            vel_line[0] = str(atoms_num)
+                            new_velocities += (' '.join(vel_line) + '\n')
                         
                         
         self.modify_atom_number(atoms_num)
         self.header = self.header.replace('\n', "\n#Region multiplied\n", 1)
-        self.write_to_file(self.header, new_lines, new_velocities)
+        if modifying_vel:
+            self.write_to_file(self.header, new_lines, new_velocities)
+        else:
+            self.write_to_file(self.header, new_lines, "")
         lg = Logger.Logger()
         lg.write_line(["ML", "Region Multiplication", f"Modified File: {self.file}", f"Scale: x:{scale[0]}, y:{scale[1]}, z:{scale[2]}"])
     
@@ -265,6 +280,11 @@ class DataModifier:
         self.lines = self.get_atom_lines()
         self.velocities = self.get_velocities()
         self.coords = self.get_coords()
+
+        if velocity_dict:
+            modifying_vel = True
+        else:
+            modifying_vel = False
         
         total_charge = 0
         for line in self.lines:
@@ -282,12 +302,16 @@ class DataModifier:
                 atom_type = int(splt[1])
                 if not self.charge_dict[atom_type - 1] in to_rem:
                     new_lines.append(line)
-                    new_velocities.append(' '.join(vel_dict[splt[0]]))
+                    if modifying_vel:
+                        new_velocities.append(' '.join(vel_dict[splt[0]]))
                 else:
                     to_rem.remove(self.charge_dict[atom_type - 1])
             
             self.header = self.header.replace('\n', "\n#Charge balanced\n", 1)
-            self.write_to_file(self.header, '\n'.join(new_lines), '\n'.join(new_velocities))
+            if modifying_vel:
+                self.write_to_file(self.header, '\n'.join(new_lines), '\n'.join(new_velocities))
+            else:
+                self.write_to_file(self.header, '\n'.join(new_lines), "")
             lg = Logger.Logger()
             lg.write_line(["ML", "Charge Balancing", f"Modified File: {self.file}", f"Charge Array: {self.charge_dict}"])
         else:
