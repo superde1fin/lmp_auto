@@ -7,7 +7,7 @@ import sys
 """Data Generator Class"""
 class DataGenerator:
     
-    def __init__(self, atoms: Dict[str, int], density: float, filename: str = "data.initial", generate_datafile:bool = False, bonds:int = 0, angles:int = 0, dihedrals:int = 0, impropers:int = 0, region_coordinates: Tuple[int, int, int] = (0, 0, 0, 1), distance_from_walls:float = 0.5, submit_batch:bool = False, m:int = 10, force_field:bool = False):
+    def __init__(self, atoms: Dict[str, int], density: float, filename: str = "data.initial", generate_datafile:bool = False, bonds:int = 0, angles:int = 0, dihedrals:int = 0, impropers:int = 0, region_coordinates: Tuple[int, int, int] = (0, 0, 0, 1), distance_from_walls:float = 0.5, m:int = 10, force_field:bool = False):
         #Atoms dictionary consists of pairs with atoms' types and quantities. Example: {"O":3,  "B":1, "Si":4}
         
         self.atoms = atoms
@@ -20,7 +20,7 @@ class DataGenerator:
         self.impropers = impropers
         self.region_coordinates = region_coordinates
         self.distance_from_walls = distance_from_walls
-        self.submit_batch = submit_batch
+#        self.submit_batch = submit_batch
         self.force_field = force_field
         self.scaled = False
         
@@ -165,10 +165,10 @@ class DataGenerator:
         self.header_setup()
         self.create_atom_positions()
         lg = Logger.Logger()
-        lg.write_line([self.atoms, self.density, self.filename, self.bonds, self.angles, self.dihedrals, self.impropers, self.region_coordinates, self.distance_from_walls, self.submit_batch, self.m])
+        lg.write_line([self.atoms, self.density, self.filename, self.bonds, self.angles, self.dihedrals, self.impropers, self.region_coordinates, self.distance_from_walls, self.m])
 
-        if self.submit_batch:
-            os.system("vim `ls *.pbs | head -1`")
+#        if self.submit_batch:
+#            os.system("vim `ls *.pbs | head -1`")
         
         if self.force_field:
             self.setup_force_field()

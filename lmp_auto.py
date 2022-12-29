@@ -18,7 +18,7 @@ def generator_attributes_assignment(args):
 
  
     
-    if not (args.filename or args.region_coordinates or args.walls_margin or args.bonds or args.angles or args.dihedrals or args.impropers or args.submit_batch or args.m or args.force_field):
+    if not (args.filename or args.region_coordinates or args.walls_margin or args.bonds or args.angles or args.dihedrals or args.impropers or args.m or args.force_field):
         dg = DataGenerator.DataGenerator(atoms = input_atoms, density = input_density, generate_datafile = True)
         sys.exit()
     else:
@@ -75,14 +75,14 @@ def generator_attributes_assignment(args):
         except:
             print("Error: Incorrect dihedrals value format. Example 5\n")
             sys.exit()
-    if args.submit_batch:
-        if args.submit_batch.lower() == "true":
-            dg.submit_batch = True
-        elif args.submit_batch.lower() == "false":
-            dg.submit_batch = False
-        else:
-            print("Error: Incorrect submit_batch value format. Example True\n")
-            sys.exit()
+#    if args.submit_batch:
+#        if args.submit_batch.lower() == "true":
+#            dg.submit_batch = True
+#        elif args.submit_batch.lower() == "false":
+#            dg.submit_batch = False
+#        else:
+#            print("Error: Incorrect submit_batch value format. Example True\n")
+#            sys.exit()
     if args.force_field:
         if args.force_field.lower() == "true":
             dg.force_field = True
@@ -119,7 +119,7 @@ def main():
     parser_generator.add_argument("-m", "--m", help = "Scaling factor for the number of molecules")
     parser_generator.add_argument("-dh", "--dihedrals", help = "Lammps dihedrals specification. Default: 0")
     parser_generator.add_argument("-i", "--impropers", help = "Lammps impropers specification. Default: 0")
-    parser_generator.add_argument("-sb", "--submit_batch", help = "When this argument is True the program automatically submits a modeling job to the server. Default: False")
+#    parser_generator.add_argument("-sb", "--submit_batch", help = "When this argument is True the program automatically submits a modeling job to the server. Default: False")
     parser_generator.add_argument("-fi", "--from_instance", help = "Allows a user to pull simulation input parameters from a logged instance (n)")
     parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: Flase")
     
@@ -169,7 +169,7 @@ def main():
                 parsed_file["from_instance"] = False
 
             for key, value in parsed_file.items():
-                if key not in ["molecules_dict","density","filename","region_coordinates","walls_margin","bonds","angles","dihedrals","impropers","submit_batch", "m", "from_instance", "force_field"]:
+                if key not in ["molecules_dict","density","filename","region_coordinates","walls_margin","bonds","angles","dihedrals","impropers","m", "from_instance", "force_field"]:
                     print(f"Incorrect argument {key}. Check available arguments by using \"-h\" or \"--help\"\n")
                     sys.exit()
                 if key == "molecules_dict" and not args.molecules_dict: args.molecules_dict = value
@@ -181,7 +181,7 @@ def main():
                 elif key == "angles" and not args.angles: args.angles = value
                 elif key == "dihedrals" and not args.dihedrals: args.dihedrals = value
                 elif key == "impropers" and not args.impropers: args.impropers = value
-                elif key == "submit_batch" and not args.submit_batch: args.submit_batch = value
+#                elif key == "submit_batch" and not args.submit_batch: args.submit_batch = value
                 elif key == "m" and not args.m: args.m = value
                 elif key == "from_instance" and not args.from_instance: args.from_instance = value
                 elif key == "force_field" and not args.force_field: args.force_field = value
