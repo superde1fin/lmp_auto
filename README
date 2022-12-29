@@ -12,5 +12,22 @@ Use with installation (preferred):
 
 1. Navigate to a folder with lmp_auto project
 2. Create a build directory by executing: mkdir build && cd build
-3. Run the configuration file: ../configure -prefix=/path/to/installation
+3. Run the configuration file: ../configure --prefix=/path/to/installation --install-requirements=true
 4. Use the lmp_auto binary: lmp_auto.py (make sure the installation directory is in your $PATH variable by executing: echo $PATH
+
+Instructions for setup file format:
+Use the names (without dashes) that appear in the help messages for specifying the input parameters.
+
+Example of a setup.txt file:
+#Beginning of a setup file
+molecules_dict = {"SiO2":80, "H2O":20}
+m = 15
+density = 3.02
+#End of a setup file
+
+Valuable notes:
+When specifying a setup file one can also pass positional arguments to lmp_auto like so:
+
+lmp_auto generator -sf setup.txt -ff true -d 1.8
+
+The arguents' values that were present in the setupfile will be overwritten with the respective values specified by the positional arguments. (In the case above density will be taken as 1.8)
