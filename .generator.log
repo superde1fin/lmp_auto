@@ -1,0 +1,4 @@
+#Log file for Lammps initial data generation
+#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, submit_batch, m, date of run, time of run
+0 | {"Si": 800, "O": 1800, "Na": 200} | 3.0 | data.initial | 0 | 0 | 0 | 0 | (0, 0, 0, 1) | 0.5 | False | 10 | 12/28/2022 | 19:39:59
+1 | {"Si": 800, "O": 1800, "Na": 200} | 3.0 | data.initial | 0 | 0 | 0 | 0 | (0, 0, 0, 1) | 0.5 | False | 10 | 12/28/2022 | 19:40:04
