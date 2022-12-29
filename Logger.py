@@ -8,7 +8,7 @@ class Logger:
             with open(self.log_filename, 'r') as f:
                 self.lines = f.readlines()
         except:
-            open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, submit_batch, m, date of run, time of run\n")
+            open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
             with open(self.log_filename, 'r') as f:
                 self.lines = f.readlines()
     
@@ -44,7 +44,7 @@ class Logger:
         print(filtered_lines[n])
         
     def clear(self):
-        open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, submit_batch, m, date of run, time of run\n")
+        open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
         
     def write_line(self, arg_arr):
         file_lines = list(filter(lambda x: (x[0] != '#' and x[0] != '\n'), self.lines))
