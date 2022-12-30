@@ -170,11 +170,14 @@ class DataModifier:
             self.write_to_file(self.header, '\n'.join(new_lines),"")
         lg = Logger.Logger()
         lg.write_line(["CT", "Hole Cutout", f"Modified File: {self.file}", f"Cut Shape: {shape}", f"Hole Center: {tuple([round(coord, 3) for coord in origin])}", f"Region Definition: {region_def}", f"Balanced: {bc if bc else False}"])
+        lg.record_file_changes()
+        
     
     def modify_name(self):
         name, dtype = self.file.split('.')
-        new_name =  name + "(initial)" + '.' + dtype
+        new_name =  '.' + name + ".prev" + '.' + dtype
         if not new_name in os.popen("ls").read():
+            print("Saving an old version")
             os.system(f"cp {self.file} \"{new_name}\"")
     
     def modify_atom_number(self, n):
@@ -270,6 +273,7 @@ class DataModifier:
             self.write_to_file(self.header, new_lines, "")
         lg = Logger.Logger()
         lg.write_line(["ML", "Region Multiplication", f"Modified File: {self.file}", f"Scale: x:{scale[0]}, y:{scale[1]}, z:{scale[2]}"])
+        lg.record_file_changes()
     
     def balance_charge(self):
         
@@ -314,8 +318,10 @@ class DataModifier:
                 self.write_to_file(self.header, '\n'.join(new_lines), '\n'.join(new_velocities))
             else:
                 self.write_to_file(self.header, '\n'.join(new_lines), "")
-#            lg = Logger.Logger()
+            lg = Logger.Logger()
 #            lg.write_line(["BL", "Charge Balancing", f"Modified File: {self.file}", f"Charge Array: {self.charge_dict}"])
+            lg.record_file_changes()
+
         else:
             print("Total charge is already 0")
 

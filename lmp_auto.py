@@ -131,6 +131,8 @@ def main():
     logger_group.add_argument("-c", "--comment", help = "Add a comment line into a log file", metavar = "")
     logger_group.add_argument("-f", "--find", help = "Display the nth instance written in the log file", metavar = "")
     logger_group.add_argument("-cl", "--clear", action = "store_true",  help = "Clear the log file")
+    logger_group.add_argument("-vb", "--version-back",  help = "Return to a previous version of a specified file.", metavar = "")
+    logger_group.add_argument("-vf", "--version-forward",  help = "Switch to a newer version of a specified file", metavar = "")
     
     #Setting up modifier subparsers
     parser_modifier = subparsers.add_parser("modifier", help = "Allows the user to perform system modifications")
@@ -220,6 +222,10 @@ def main():
             else:
                 print("The log file was NOT deleted.")
                 sys.exit()
+        if args.version_back:
+            lg.version_back(args.version_back)
+        if args.version_forward:
+            lg.version_forward(args.version_forward)
     
     elif args.mode == "modifier":
         if args.from_instance:

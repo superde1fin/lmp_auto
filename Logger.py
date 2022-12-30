@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import glob, os, sys, subprocess
 """Logger Class"""
 class Logger:
     log_filename = ".automator.log"
@@ -89,6 +90,59 @@ class Logger:
             
             
         return args_dict
+    
+    def record_file_changes(self):
+        filename = glob.glob(".*.prev.*")
+        if filename:
+            filename = filename[0]
+            name4save = filename.replace(".prev", '')
+            if not os.path.exists(".versions"):
+                os.system("mkdir -p .versions/old")
+                os.system("mkdir -p .versions/new")
+            subprocess.call(["rm",  ".versions/new/.*{name4save}"], stdout=open(os.devnull, "w"), stderr=subprocess.STDOUT)
+            files = os.popen("ls -all .versions/old").read().strip()
+            files = files.split('\n')[3:]
+            if files:
+                version = max([int(line.split('.')[1]) for line in files]) + 1
+            else:
+                version = 0
+            os.popen(f"mv {filename} .versions/old/.{version}{name4save}")
+        else:
+            print("No modifications have been made, or the previous datafile was removed")
+            sys.exit()
+
+    def version_back(self, filename):
+        if os.path.exists(".versions"):
+            old_files = os.popen("ls -all .versions/old").read().strip().split('\n')[3:]
+            new_files = os.popen("ls -all .versions/new").read().strip().split('\n')[3:]
+            old_version = 0 if not old_files else max([int(line.split('.')[1]) for line in old_files])
+            new_version = 0 if not new_files else max([int(line.split('.')[1]) for line in new_files]) + 1
+            if glob.glob(f".versions/old/.*.{filename}"):
+                os.system(f"cp {filename} .versions/new/.{new_version}.{filename}")
+                os.system(f"mv .versions/old/.{old_version}.{filename} {filename}")
+            else:
+                print(f"No previous versions of file {filename} available")
+                sys.exit()
+        else:
+            print("No previous versions available")
+            sys.exit()
+
+
+    def version_forward(self, filename):
+        if os.path.exists(".versions"):
+            old_files = os.popen("ls -all .versions/old").read().strip().split('\n')[3:]
+            new_files = os.popen("ls -all .versions/new").read().strip().split('\n')[3:]
+            old_version = 0 if not old_files else max([int(line.split('.')[1]) for line in old_files]) + 1
+            new_version = 0 if not new_files else max([int(line.split('.')[1]) for line in new_files])
+            if glob.glob(f".versions/new/.*.{filename}"):
+                os.system(f"cp {filename} .versions/old/.{old_version}.{filename}")
+                os.system(f"mv .versions/new/.{new_version}.{filename} {filename}")
+            else:
+                print(f"No future versions of file {filename} available")
+                sys.exit()
+        else:
+            print("No future versions available")
+            sys.exit()
 
 
 
