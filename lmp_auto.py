@@ -104,49 +104,50 @@ def main():
                                                                                 epilog = "This code was created by the researchers at Alfred University Glass Labs and based on the code provided by the Mauro Glass Group.",
                                                                                 usage = "lmp_auto {mode} {-p/--parameter} {argument}")
     #Creating a subparsers group "mode" to allow a user to switch between generation, logging, and modifying
-    subparsers =   parser.add_subparsers(help = "Mode of data creator operation", dest = "mode")
+    subparsers =   parser.add_subparsers(help = "Mode of data creator operation", dest = "mode", metavar = "")
     
     #Setting up generator arguments
     parser_generator = subparsers.add_parser("generator", help = "Generates all necessary datafiles for Lammps simulation")
-    parser_generator.add_argument("-sf", "--setup_file", help = "Read input parameters from a setup file. Additional arguments specified explicitly will override file values")
-    parser_generator.add_argument("-md", "--molecules_dict", help = "Molecules dictionary in the following format: {\"molecule name\":quantity of molecules}")
-    parser_generator.add_argument("-d", "--density", help = "Expected density of material")
-    parser_generator.add_argument("-f", "--filename", help = "Name of the file where initial Lammps data will be written. Default: \"data.initial\"")
-    parser_generator.add_argument("-rc", "--region_coordinates", help = "Coordinates of the simulation shape origin. {\"box\":(x, y, z), \"cylinder\":(x, y, z, r), \"cylinder\":(), \"cone\":(), \"ellipsoid\":(), \"plane\":(), \"prism\":(), \"sphere\":()} Default: (0, 0, 0, 1)")
-    parser_generator.add_argument("-wm", "--walls_margin", help = "Inner margin legth of the boxs in which no atoms will be generated. Default: 0.1Å")
-    parser_generator.add_argument("-b", "--bonds", help = "Lammps bonds specification. Default: 0")
-    parser_generator.add_argument("-a", "--angles", help = "Lammps angles specification. Default: 0")
-    parser_generator.add_argument("-m", "--m", help = "Scaling factor for the number of molecules")
-    parser_generator.add_argument("-dh", "--dihedrals", help = "Lammps dihedrals specification. Default: 0")
-    parser_generator.add_argument("-i", "--impropers", help = "Lammps impropers specification. Default: 0")
+    parser_generator.add_argument("-sf", "--setup_file", help = "Read input parameters from a setup file. Additional arguments specified explicitly will override file values", metavar = "")
+    parser_generator.add_argument("-md", "--molecules_dict", help = "Molecules dictionary in the following format: \'{\"molecule name\":quantity of molecules}\'", metavar = "")
+    parser_generator.add_argument("-d", "--density", help = "Expected density of material", metavar = "")
+    parser_generator.add_argument("-f", "--filename", help = "Name of the file where initial Lammps data will be written. Default: \"data.initial\"", metavar = "")
+    parser_generator.add_argument("-rc", "--region_coordinates", help = "Coordinates of the simulation box origin \'(x, y, z)\'. Default: (0, 0, 0)", metavar = "")
+    parser_generator.add_argument("-wm", "--walls_margin", help = "Inner margin legth of the boxs in which no atoms will be generated. Default: 0.1Å", metavar = "")
+    parser_generator.add_argument("-b", "--bonds", help = "Lammps bonds specification. Default: 0", metavar = "")
+    parser_generator.add_argument("-a", "--angles", help = "Lammps angles specification. Default: 0", metavar = "")
+    parser_generator.add_argument("-m", "--m", help = "Scaling factor for the number of molecules", metavar = "")
+    parser_generator.add_argument("-dh", "--dihedrals", help = "Lammps dihedrals specification. Default: 0", metavar = "")
+    parser_generator.add_argument("-i", "--impropers", help = "Lammps impropers specification. Default: 0", metavar = "")
 #    parser_generator.add_argument("-sb", "--submit_batch", help = "When this argument is True the program automatically submits a modeling job to the server. Default: False")
-    parser_generator.add_argument("-fi", "--from_instance", help = "Allows a user to pull simulation input parameters from a logged instance (n)")
-    parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: Flase")
+    parser_generator.add_argument("-fi", "--from_instance", help = "Allows a user to pull simulation input parameters from a logged instance (n)", metavar = "")
+    parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: Flase", metavar = "")
     
     
     #Setting up mutually exclusive logger arguments
     parser_logger = subparsers.add_parser("logger", help = "Helps access and organize the run logs")
     logger_group = parser_logger.add_mutually_exclusive_group()
-    logger_group.add_argument("-d", "--display", help = "Display last n instances written in the log file (Display all by passing \"all\" keyword)")
-    logger_group.add_argument("-c", "--comment", help = "Add a comment line into a log file")
-    logger_group.add_argument("-f", "--find", help = "Display the nth instance written in the log file")
+    logger_group.add_argument("-d", "--display", help = "Display last n instances written in the log file (Display all by passing \"all\" keyword)", metavar = "")
+    logger_group.add_argument("-c", "--comment", help = "Add a comment line into a log file", metavar = "")
+    logger_group.add_argument("-f", "--find", help = "Display the nth instance written in the log file", metavar = "")
     logger_group.add_argument("-cl", "--clear", action = "store_true",  help = "Clear the log file")
     
     #Setting up modifier subparsers
     parser_modifier = subparsers.add_parser("modifier", help = "Allows the user to perform system modifications")
-    parser_modifier.add_argument("-f", "--file", help = "The .structure file to be modified", required = True)
-    modifier_subparsers = parser_modifier.add_subparsers(help = "Different modifier options", dest = "mod_mode")
+    parser_modifier.add_argument("-f", "--file", help = "The .structure/.initial file to be modified", metavar = "")
+    parser_modifier.add_argument("-fi", "--from_instance", help = "Allows the user to pull modification parameters from a logged instance", metavar = "")
+    modifier_subparsers = parser_modifier.add_subparsers(help = "Different modifier options", dest = "mod_mode", metavar = "")
     
     #Setting up cut arguments
     cut_parser = modifier_subparsers.add_parser("cut", help = "Creates a hole in a sample based the origin and shape type")
-    cut_parser.add_argument("-s", "--shape", help = "Shape of the geometry to be cut out [box, ellipse]", default = "box")
-    cut_parser.add_argument("-r", "--region", help = "Region definition parameter [box - (xside, yside, zside), ellipse - (xaxis, yaxis, zaxis)]", required = True)
-    cut_parser.add_argument("-o", "--origin", help = "Origin (center) of the body to shape to be cut out. Example: (0, 0, 0) (Automatically calculate the center of the region by passing \"center\" keyword)", default = "(0, 0, 0)")
-    cut_parser.add_argument("-b", "--balance", help = "Balances the charge of the system after the cut. Off by default. Requires a dictionary of charges as an input: {\"1\":4, \"2\":-2, \"3\":1, \"4\":1}", default = "")
+    cut_parser.add_argument("-s", "--shape", help = "Shape of the geometry to be cut out [box, ellipse]", default = "box", metavar = "")
+    cut_parser.add_argument("-r", "--region", help = "Region definition parameter [box - (xside, yside, zside), ellipse - (xaxis, yaxis, zaxis)]", required = True, metavar = "")
+    cut_parser.add_argument("-o", "--origin", help = "Origin (center) of the body to shape to be cut out. Example: \'(0, 0, 0)\' (Automatically calculate the center of the region by passing \"center\" keyword)", default = "(0, 0, 0)", metavar = "")
+    cut_parser.add_argument("-b", "--balance", help = "Balances the charge of the system after the cut. Off by default. Requires a dictionary of charges as an input: \'{\"1\":4, \"2\":-2, \"3\":1, \"4\":1}\'", default = "", metavar = "")
     
     #Setting up multiply commands
     multiply_parser = modifier_subparsers.add_parser("multiply", help = "Extends the simmulation region by copying it in all three dimensions according to input parameters.")
-    multiply_parser.add_argument("-s", "--scale", help = "A tuple that tells the program how many times to copy an existing system in all directions. Example: (1, 1, 1)", default = "(1, 1, 1)")
+    multiply_parser.add_argument("-s", "--scale", help = "A tuple that tells the program how many times to copy an existing system in all directions. Example: \'(1, 1, 1)\'", default = "(1, 1, 1)", metavar = "")
     
     
     
@@ -160,14 +161,15 @@ def main():
                 lg = Logger.Logger()
                 try:
                     parsed_file = lg.pull_instance(int(args.from_instance))
+                    if parsed_file["inst_type"] != "GE":
+                        raise RuntimeError("Error: Incorrect instance value (Make sure to select a generator log instance). Example: 3")
                     parsed_file["from_instance"] = True
                 except:
-                    print("Error: Incorrect instance value (Make sure to select a generator log instance). Example: 3")
                     sys.exit()
             else:
                 parsed_file = helper_functions.parse_setup_file(args.setup_file)
                 parsed_file["from_instance"] = False
-
+            print(args)
             for key, value in parsed_file.items():
                 if key not in ["molecules_dict","density","filename","region_coordinates","walls_margin","bonds","angles","dihedrals","impropers","m", "from_instance", "force_field"]:
                     print(f"Incorrect argument {key}. Check available arguments by using \"-h\" or \"--help\"\n")
@@ -220,6 +222,24 @@ def main():
                 sys.exit()
     
     elif args.mode == "modifier":
+        if args.from_instance:
+            lg = Logger.Logger()
+            try:
+                parsed_file = lg.pull_instance(int(args.from_instance))
+                if parsed_file["inst_type"] != "ML" and parsed_file["inst_type"] != "CT":
+                    raise RuntimeError(f"Error: Incorrect instance value {parsed_file['inst_type']} (Make sure to select a modifier log instance). Example: 3")
+                if not args.file:
+                    args.file = parsed_file["filename"]
+                if parsed_file["inst_type"] == "ML":
+                    args.mod_mode = "multiply"
+                elif parsed_file["inst_type"] == "CT":
+                   args.mod_mode = "cut" 
+            except Exception as e:
+                print(e)
+                sys.exit()
+        if not args.file:
+            print("ERROR: Missing a required argument: -f/--file")
+            sys.exit()
         try:
             dm = DataModifier.DataModifier(args.file)
         except:
@@ -227,11 +247,27 @@ def main():
             sys.exit()
             
         if args.mod_mode == "cut":
+            if args.from_instance:
+                try:
+                    _ = args.origin
+                    changing_inst = True
+                except:
+                    changing_inst = False
+                if not changing_inst:
+                    args.origin = parsed_file["origin"]
+                    args.shape = parsed_file["shape"]
+                    args.region = parsed_file["region"]
+                    args.balance = parsed_file["balance"]
+                else:
+                    if not args.origin: args.origin = parsed_file["origin"]
+                    elif not args.shape: args.shape = parsed_file["shape"]
+                    elif not args.region: args.region = parsed_file["region"]
+                    elif not args.balance: args.balance = parsed_file["balance"]
             if args.origin == "center":
                 cntr = "center"
             else:
                 cntr = helper_functions.str2tuple(args.origin)
-            dm.cut_out(args.shape, helper_functions.str2tuple(args.region), cntr)
+            dm.cut_out(args.shape, helper_functions.str2tuple(args.region), cntr, bc = args.balance)
             if args.balance:
                 try:
                     dm.charge_dict = helper_functions.dict2arr(json.loads(args.balance))
@@ -241,6 +277,8 @@ def main():
                     sys.exit()
                     
         elif args.mod_mode == "multiply":
+            if args.from_instance:
+                args.scale = parsed_file["scale"]
             dm.multiply_region(helper_functions.str2tuple(args.scale))
     
     

@@ -1,14 +1,14 @@
 from datetime import date, datetime
 """Logger Class"""
 class Logger:
-    log_filename = ".generator.log"
+    log_filename = ".automator.log"
     
     def __init__(self):
         try:
             with open(self.log_filename, 'r') as f:
                 self.lines = f.readlines()
         except:
-            open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
+            open(self.log_filename, 'w').write("#Lammps Automator log file.\n#General prefixes format: Instance Number, Instance Type, Type Description\n#Generator Format: Instance Number, Instance Type, Instance Description, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
             with open(self.log_filename, 'r') as f:
                 self.lines = f.readlines()
     
@@ -44,7 +44,7 @@ class Logger:
         print(filtered_lines[n])
         
     def clear(self):
-        open(self.log_filename, 'w').write("#Log file for Lammps initial data generation\n#Format: Instance number, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
+        open(self.log_filename, 'w').write("#Lammps Automator log file.\n#General prefixes format: Instance Number, Instance Type, Type Description\n#Generator Format: Instance Number, Instance Type, Instance Description, atoms, density, filename, bonds, angles, dihedrals, impropers, region_coordinates, walls_margin, m, date of run, time of run\n")
         
     def write_line(self, arg_arr):
         file_lines = list(filter(lambda x: (x[0] != '#' and x[0] != '\n'), self.lines))
@@ -62,15 +62,48 @@ class Logger:
             print(f"Error: No instance with an id of {n}")
             sys.exit()
         values = filtered_lines[n].split(" | ")[1:-2]
-        keys = self.lines[1].split(':')[1].replace(' ', '').split(',')[1:-2]
+        inst_type = values[0]
+        values = values[2:]
         args_dict = {}
-        for key, value in zip(keys, values):
-            if value == "ML":
-                print(f"Error: Not a generator log instance {n}")
-                sys.exit()
-            if key == "atoms":
-                args_dict["molecules_dict"] = value
-            elif key:
-                args_dict[key] = value
+        args_dict["inst_type"] = inst_type
+        if inst_type == "GE":
+            keys = self.lines[2].split(':')[1].replace(' ', '').split(',')[3:-2]
+            for key, value in zip(keys, values):
+                if key == "atoms":
+                    args_dict["molecules_dict"] = value
+                elif key:
+                    args_dict[key] = value
+        elif inst_type == "CT":
+            args_dict["filename"] = values[0].split(':')[1].strip()
+            args_dict["shape"] = values[1].split(':')[1].strip()
+            args_dict["origin"] = values[2].split(':')[1].strip()
+            args_dict["region"] = values[3].split(':')[1].strip()
+            balance_dict = '{' + values[4].split('{')[1].strip() 
+            args_dict["balance"] = None if "False" in balance_dict else balance_dict
+
+
+        elif inst_type == "ML":
+            args_dict["filename"] = values[0].split(':')[1].strip()
+            args_dict["scale"] = '(' + ','.join([val.split(':')[-1] for val in values[1].split(',')]) + ')'
+
+            
             
         return args_dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

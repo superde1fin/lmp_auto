@@ -1,6 +1,0 @@
-#This file can be used for a simpler argument assignment during the initial datafile generation process.
-#Each argument - value pair should start on a new line and be of format: "arg_name=value"
-molecules_dict = {"SiO2":80, "NaO":20}
-density = 1.8
-m = 10
-

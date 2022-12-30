@@ -7,7 +7,7 @@ import sys
 """Data Generator Class"""
 class DataGenerator:
     
-    def __init__(self, atoms: Dict[str, int], density: float, filename: str = "data.initial", generate_datafile:bool = False, bonds:int = 0, angles:int = 0, dihedrals:int = 0, impropers:int = 0, region_coordinates: Tuple[int, int, int] = (0, 0, 0, 1), distance_from_walls:float = 0.5, m:int = 10, force_field:bool = False):
+    def __init__(self, atoms: Dict[str, int], density: float, filename: str = "data.initial", generate_datafile:bool = False, bonds:int = 0, angles:int = 0, dihedrals:int = 0, impropers:int = 0, region_coordinates: Tuple[int, int, int] = (0, 0, 0), distance_from_walls:float = 0.5, m:int = 10, force_field:bool = False):
         #Atoms dictionary consists of pairs with atoms' types and quantities. Example: {"O":3,  "B":1, "Si":4}
         
         self.atoms = atoms

@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, random
 import Logger
 #import helper_functions as hlp
 
@@ -111,7 +111,7 @@ class DataModifier:
     """Bounding functions End"""
     
     """Modifying Functions Start"""
-    def cut_out(self, shape, region_def, origin):
+    def cut_out(self, shape, region_def, origin, bc):
         if len(region_def) != 3:
             print("Incorrect region definition")
             sys.exit()
@@ -169,7 +169,7 @@ class DataModifier:
         else:
             self.write_to_file(self.header, '\n'.join(new_lines),"")
         lg = Logger.Logger()
-        lg.write_line(["ML", "Hole Cutout", f"Modified File: {self.file}", f"Cut Shape: {shape}", f"Hole Center: {tuple([round(coord, 3) for coord in origin])}", f"Region Definition: {region_def}"])
+        lg.write_line(["CT", "Hole Cutout", f"Modified File: {self.file}", f"Cut Shape: {shape}", f"Hole Center: {tuple([round(coord, 3) for coord in origin])}", f"Region Definition: {region_def}", f"Balanced: {bc if bc else False}"])
     
     def modify_name(self):
         name, dtype = self.file.split('.')
@@ -281,7 +281,8 @@ class DataModifier:
         self.velocities = self.get_velocities()
         self.coords = self.get_coords()
 
-        if velocity_dict:
+        print(self.velocities)
+        if self.velocities:
             modifying_vel = True
         else:
             modifying_vel = False
@@ -297,6 +298,7 @@ class DataModifier:
             new_velocities = ["\nVelocities\n"]
             velocities = self.velocities.split('\n')
             vel_dict = self.get_velocity_dict()
+            random.shuffle(self.lines)
             for line in self.lines:
                 splt = line.split(' ')
                 atom_type = int(splt[1])
@@ -312,8 +314,8 @@ class DataModifier:
                 self.write_to_file(self.header, '\n'.join(new_lines), '\n'.join(new_velocities))
             else:
                 self.write_to_file(self.header, '\n'.join(new_lines), "")
-            lg = Logger.Logger()
-            lg.write_line(["ML", "Charge Balancing", f"Modified File: {self.file}", f"Charge Array: {self.charge_dict}"])
+#            lg = Logger.Logger()
+#            lg.write_line(["BL", "Charge Balancing", f"Modified File: {self.file}", f"Charge Array: {self.charge_dict}"])
         else:
             print("Total charge is already 0")
 
