@@ -1,6 +1,8 @@
 #import numpy as np
 import sys, os, argparse, json
 import DataGenerator, Logger, DataModifier, helper_functions
+from CONSTANTS import HEADER_STRINGS as hs
+from argparse import RawTextHelpFormatter
 
 
 """Attribute Assignment Function"""
@@ -43,7 +45,7 @@ def generator_attributes_assignment(args):
         try:
             dg.region_coordinates = helper_functions.str2tuple(args.region_coordinates)
         except:
-            print("Error: Incorrect origin format. Example: (3, 1, 4)\n")
+            print("Error: Incorrect origin format. Example: '(3, 1, 4)'\n")
             sys.exit()
     if args.walls_margin:
         try:
@@ -75,14 +77,6 @@ def generator_attributes_assignment(args):
         except:
             print("Error: Incorrect dihedrals value format. Example 5\n")
             sys.exit()
-#    if args.submit_batch:
-#        if args.submit_batch.lower() == "true":
-#            dg.submit_batch = True
-#        elif args.submit_batch.lower() == "false":
-#            dg.submit_batch = False
-#        else:
-#            print("Error: Incorrect submit_batch value format. Example True\n")
-#            sys.exit()
     if args.force_field:
         if args.force_field.lower() == "true":
             dg.force_field = True
@@ -98,16 +92,30 @@ def generator_attributes_assignment(args):
 """Main Function"""
 def main():
     #Creating a main console application parser
-    parser = argparse.ArgumentParser(
-                                                                                "lmp_auto.py",
-                                                                                description = "This application is an unofficial LAMMPS addon that helps to create necessary initial datafiles, modify existing structures, and keep a record of your project.",
-                                                                                epilog = "This code was created by the researchers at Alfred University Glass Labs and based on the code provided by the Mauro Glass Group.",
-                                                                                usage = "lmp_auto {mode} {-p/--parameter} {argument}")
+    #Setting up the header according to terminal width
+    console_size = os.get_terminal_size().columns
+    if console_size < 49: #length of the small header line
+        header = '\r' + hs['empty']
+    elif console_size < 73: #length of the medium header line
+        header = '\r' + hs['short']
+    elif console_size < 157: #length of the long header line
+        header = '\r' + hs['medium']
+    else:
+        header = hs['long']
+    parser = argparse.ArgumentParser("lmp_auto.py",
+                                     description = """
+usage: lmp_auto {mode} {-p/--parameter} {argument}
+
+This application is an unofficial LAMMPS addon that helps to create necessary initial datafiles, modify existing structures, and keep a record of your project.""",
+                                     epilog = "This code was created by the researchers at Alfred University Glass Labs and based on the code provided by the Mauro Glass Group.",
+                                     usage = f"\r{header}",
+                                     formatter_class=RawTextHelpFormatter)
+
     #Creating a subparsers group "mode" to allow a user to switch between generation, logging, and modifying
     subparsers =   parser.add_subparsers(help = "Mode of data creator operation", dest = "mode", metavar = "")
     
     #Setting up generator arguments
-    parser_generator = subparsers.add_parser("generator", help = "Generates all necessary datafiles for Lammps simulation")
+    parser_generator = subparsers.add_parser("generator", help = "Generates all necessary datafiles for Lammps simulation", usage = f"\r{header}\nusage: lmp_auto generator {{-p/--parameter}} {{argument}}")
     parser_generator.add_argument("-sf", "--setup_file", help = "Read input parameters from a setup file. Additional arguments specified explicitly will override file values", metavar = "")
     parser_generator.add_argument("-md", "--molecules_dict", help = "Molecules dictionary in the following format: \'{\"molecule name\":quantity of molecules}\'", metavar = "")
     parser_generator.add_argument("-d", "--density", help = "Expected density of material", metavar = "")
@@ -119,39 +127,41 @@ def main():
     parser_generator.add_argument("-m", "--m", help = "Scaling factor for the number of molecules", metavar = "")
     parser_generator.add_argument("-dh", "--dihedrals", help = "Lammps dihedrals specification. Default: 0", metavar = "")
     parser_generator.add_argument("-i", "--impropers", help = "Lammps impropers specification. Default: 0", metavar = "")
-#    parser_generator.add_argument("-sb", "--submit_batch", help = "When this argument is True the program automatically submits a modeling job to the server. Default: False")
     parser_generator.add_argument("-fi", "--from_instance", help = "Allows a user to pull simulation input parameters from a logged instance (n)", metavar = "")
     parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: Flase", metavar = "")
     
     
     #Setting up mutually exclusive logger arguments
-    parser_logger = subparsers.add_parser("logger", help = "Helps access and organize the run logs")
+    parser_logger = subparsers.add_parser("logger", help = "Helps access and organize the run logs", usage = f"\r{header}\nusage: lmp_auto logger {{-p/--parameter}} {{argument}}")
     logger_group = parser_logger.add_mutually_exclusive_group()
     logger_group.add_argument("-d", "--display", help = "Display last n instances written in the log file (Display all by passing \"all\" keyword)", metavar = "")
     logger_group.add_argument("-c", "--comment", help = "Add a comment line into a log file", metavar = "")
     logger_group.add_argument("-f", "--find", help = "Display the nth instance written in the log file", metavar = "")
     logger_group.add_argument("-cl", "--clear", action = "store_true",  help = "Clear the log file")
-    logger_group.add_argument("-vb", "--version-back",  help = "Return to a previous version of a specified file.", metavar = "")
-    logger_group.add_argument("-vf", "--version-forward",  help = "Switch to a newer version of a specified file", metavar = "")
+    logger_group.add_argument("-vb", "--version-back",  help = "Return to a previous version of a specified file. (Specify the file as an argument)", metavar = "")
+    logger_group.add_argument("-vf", "--version-forward",  help = "Switch to a newer version of a specified file. (Specify the file as an argument)", metavar = "")
     
     #Setting up modifier subparsers
-    parser_modifier = subparsers.add_parser("modifier", help = "Allows the user to perform system modifications")
+    parser_modifier = subparsers.add_parser("modifier", help = "Allows the user to perform system modifications", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} {{modifier option}} {{-p/--parameter}} {{argument}}")
     parser_modifier.add_argument("-f", "--file", help = "The .structure/.initial file to be modified", metavar = "")
     parser_modifier.add_argument("-fi", "--from_instance", help = "Allows the user to pull modification parameters from a logged instance", metavar = "")
     modifier_subparsers = parser_modifier.add_subparsers(help = "Different modifier options", dest = "mod_mode", metavar = "")
     
     #Setting up cut arguments
-    cut_parser = modifier_subparsers.add_parser("cut", help = "Creates a hole in a sample based the origin and shape type")
+    cut_parser = modifier_subparsers.add_parser("cut", help = "Creates a hole in a sample based the origin and shape type", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} cut {{-p/--parameter}} {{argument}}")
     cut_parser.add_argument("-s", "--shape", help = "Shape of the geometry to be cut out [box, ellipse]", default = "box", metavar = "")
-    cut_parser.add_argument("-r", "--region", help = "Region definition parameter [box - (xside, yside, zside), ellipse - (xaxis, yaxis, zaxis)]", required = True, metavar = "")
+    cut_parser.add_argument("-r", "--region", help = "Region definition parameter [box - '(xside, yside, zside)', ellipse - '(xaxis, yaxis, zaxis)']", required = True, metavar = "")
     cut_parser.add_argument("-o", "--origin", help = "Origin (center) of the body to shape to be cut out. Example: \'(0, 0, 0)\' (Automatically calculate the center of the region by passing \"center\" keyword)", default = "(0, 0, 0)", metavar = "")
     cut_parser.add_argument("-b", "--balance", help = "Balances the charge of the system after the cut. Off by default. Requires a dictionary of charges as an input: \'{\"1\":4, \"2\":-2, \"3\":1, \"4\":1}\'", default = "", metavar = "")
     
     #Setting up multiply commands
-    multiply_parser = modifier_subparsers.add_parser("multiply", help = "Extends the simmulation region by copying it in all three dimensions according to input parameters.")
+    multiply_parser = modifier_subparsers.add_parser("multiply", help = "Extends the simmulation region by copying it in all three dimensions according to input parameters.", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} multiply {{-p/--parameter}} {{argument}}")
     multiply_parser.add_argument("-s", "--scale", help = "A tuple that tells the program how many times to copy an existing system in all directions. Example: \'(1, 1, 1)\'", default = "(1, 1, 1)", metavar = "")
     
     
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit()
     
     args = parser.parse_args()
 

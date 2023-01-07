@@ -16,6 +16,10 @@ Use with installation (preferred):
 4. Use the lmp_auto binary: lmp_auto.py (make sure the installation directory is in your $PATH variable by executing: echo $PATH
 
 Instructions for setup file format:
+To create an empty setup file run the generator command as if the file is already there:
+$lmp_auto generator -sf setup.txt
+This is going to give you and error and create an empty file with a discriptive header for you.
+
 Use the names (without dashes) that appear in the help messages for specifying the input parameters.
 
 Example of a setup.txt file:
@@ -28,6 +32,6 @@ density = 3.02
 Valuable notes:
 When specifying a setup file one can also pass positional arguments to lmp_auto like so:
 
-lmp_auto generator -sf setup.txt -ff true -d 1.8
+$lmp_auto generator -sf setup.txt -ff true -d 1.8
 
 The arguents' values that were present in the setupfile will be overwritten with the respective values specified by the positional arguments. (In the case above density will be taken as 1.8)
