@@ -80,7 +80,7 @@ class DataGenerator:
         #Writing up the header of the lammps datafile according to the rules listed here: https://docs.lammps.org/read_data.html
         header = f"""#{first_line}
 
-{self.atom_number} atoms
+{int(self.atom_number)} atoms
 {self.bonds} bonds
 {self.angles} angles
 {self.dihedrals} dihedrals

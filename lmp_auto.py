@@ -128,7 +128,7 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
     parser_generator.add_argument("-dh", "--dihedrals", help = "Lammps dihedrals specification. Default: 0", metavar = "")
     parser_generator.add_argument("-i", "--impropers", help = "Lammps impropers specification. Default: 0", metavar = "")
     parser_generator.add_argument("-fi", "--from_instance", help = "Allows a user to pull simulation input parameters from a logged instance (n)", metavar = "")
-    parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: Flase", metavar = "")
+    parser_generator.add_argument("-ff", "--force_field", help = "Help setup a .FF file that defines atom interactions. Default: False", metavar = "")
     
     
     #Setting up mutually exclusive logger arguments
