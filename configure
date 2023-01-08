@@ -130,13 +130,13 @@ fi
 #Compile python files
 if [ -f "lmp_auto.py" ]
 then
-	python3 -m nuitka --follow-imports lmp_auto.py 
+	python3 -m nuitka --follow-imports python_part/lmp_auto.py 
 else
 	if [ -f "../lmp_auto.py" ]
 	then
-		sudo python3 -m nuitka --follow-imports ../lmp_auto.py 
+		sudo python3 -m nuitka --follow-imports ../python_part/lmp_auto.py 
 	else
-		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build/project folder.\n"
+		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build or main project folder.\n"
 	fi
 fi
 
