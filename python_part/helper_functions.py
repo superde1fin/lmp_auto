@@ -39,6 +39,12 @@ def str2tuple(tuple_string):
     except:
         raise Exception("Non-int elements in a tuple")
 
+def str2tuple_any(tuple_string):
+    tuple_string = tuple_string.replace('(', '')
+    tuple_string = tuple_string.replace(')', '')
+    tuple_string = tuple_string.replace(' ', '')
+    return tuple(tuple_string.split(','))
+
 def parse_setup_file(filename):
     result_dict = {}
     try:

@@ -87,6 +87,15 @@ class Logger:
             args_dict["filename"] = values[0].split(':')[1].strip()
             args_dict["scale"] = '(' + ','.join([val.split(':')[-1] for val in values[1].split(',')]) + ')'
 
+        elif inst_type == "SR":
+            args_dict["filename"] = values[0].split(':')[1].strip()
+            shortener_params = '(' + ','.join([val.split(':')[-1] for val in values[1].split(',')]) + ')'
+            if values[1].split(',')[-1].split(':')[0].strip() == "block_size":
+                name = "shorten_block"
+            else:
+                name = "shorten_delim"
+            args_dict[name] = shortener_params
+
             
             
         return args_dict

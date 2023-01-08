@@ -1,5 +1,11 @@
 import sys, os, random
 import Logger
+#Importing the shortener library locally
+from pathlib import Path
+sys.path.append(str(Path(__file__).parents[1]))
+import cpp_part.shrt_lib as shrt_lib
+
+
 #import helper_functions as hlp
 
 class DataModifier:
@@ -328,6 +334,20 @@ class DataModifier:
     def write_to_file(self, new_header, new_lines, new_velocities):
         self.modify_name()
         open(self.file, 'w').write(new_header + '\n\n' + new_lines + '\n' + new_velocities)
+
+    def shorten_block(self, start_line, end_line, step, block_size):
+        lg = Logger.Logger()
+        shrt = shrt_lib.Shortener(self.file)
+        res = shrt.shorten_file(start_line, end_line, step, block_size)
+        lg.write_line(["SR", "File shortening by block", f"Modified File: {self.file}", f"Shortening parameters: start_line:{start_line}, end_line:{end_line}, step:{step}, block_size:{block_size}"])
+        return res
+
+    def shorten_delim(self, start_line, end_line, step, delim):
+        lg = Logger.Logger()
+        shrt = shrt_lib.Shortener(self.file)
+        res = shrt.shorten_file(start_line, end_line, step, delim)
+        lg.write_line(["SR", "File shortening by delimiter", f"Modified File: {self.file}", f"Shortening parameters: start_line:{start_line}, end_line:{end_line}, step:{step}, delimiter:{delim}"])
+        return res
 
     """Modifying Functions End"""
     

@@ -148,7 +148,7 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
     modifier_subparsers = parser_modifier.add_subparsers(help = "Different modifier options", dest = "mod_mode", metavar = "")
     
     #Setting up cut arguments
-    cut_parser = modifier_subparsers.add_parser("cut", help = "Creates a hole in a sample based the origin and shape type", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} cut {{-p/--parameter}} {{argument}}")
+    cut_parser = modifier_subparsers.add_parser("cut", help = "Creates a hole in a sample based the origin and shape type.", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} cut {{-p/--parameter}} {{argument}}")
     cut_parser.add_argument("-s", "--shape", help = "Shape of the geometry to be cut out [box, ellipse]", default = "box", metavar = "")
     cut_parser.add_argument("-r", "--region", help = "Region definition parameter [box - '(xside, yside, zside)', ellipse - '(xaxis, yaxis, zaxis)']", required = True, metavar = "")
     cut_parser.add_argument("-o", "--origin", help = "Origin (center) of the body to shape to be cut out. Example: \'(0, 0, 0)\' (Automatically calculate the center of the region by passing \"center\" keyword)", default = "(0, 0, 0)", metavar = "")
@@ -157,6 +157,12 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
     #Setting up multiply commands
     multiply_parser = modifier_subparsers.add_parser("multiply", help = "Extends the simmulation region by copying it in all three dimensions according to input parameters.", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} multiply {{-p/--parameter}} {{argument}}")
     multiply_parser.add_argument("-s", "--scale", help = "A tuple that tells the program how many times to copy an existing system in all directions. Example: \'(1, 1, 1)\'", default = "(1, 1, 1)", metavar = "")
+
+    #Setting up shortener commands
+    shortener_parser = modifier_subparsers.add_parser("shortener", help = "Helps shorten files for the purpose of less timely anslysis of data.", usage = f"\r{header}\nusage: lmp_auto modifier -f {{file}} shortener {{-p/--parameter}} {{argument}}")
+    shortener_group = shortener_parser.add_mutually_exclusive_group()
+    shortener_group.add_argument("-sb", "--shorten-block", help = "Shortens files by '(start line, end line, sieve step, block size)'", metavar = "")
+    shortener_group.add_argument("-sd", "--shorten-delimiter", help = "Shortens files by '(start line, end line, sieve step, delimiter line)'", metavar = "")
     
     
     if len(sys.argv) == 1:
@@ -242,7 +248,7 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
             lg = Logger.Logger()
             try:
                 parsed_file = lg.pull_instance(int(args.from_instance))
-                if parsed_file["inst_type"] != "ML" and parsed_file["inst_type"] != "CT":
+                if parsed_file["inst_type"] not in ["ML", "CT", "SR"]:
                     raise RuntimeError(f"Error: Incorrect instance value {parsed_file['inst_type']} (Make sure to select a modifier log instance). Example: 3")
                 if not args.file:
                     args.file = parsed_file["filename"]
@@ -250,9 +256,24 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
                     args.mod_mode = "multiply"
                 elif parsed_file["inst_type"] == "CT":
                    args.mod_mode = "cut" 
+                elif parsed_file["inst_type"] == "SR":
+                    args.mod_mode = "shortener"
+                    if "shorten_block" in parsed_file:
+                        args.shorten_block = parsed_file["shorten_block"]
+                        args.shorten_delimiter = None
+                    elif "shorten_delim" in parsed_file:
+                        args.shorten_delimiter = parsed_file["shorten_delim"]
+                        args.shorten_block = None
+                    else:
+                        print("The shortener instance has been tempered with. Please choose another instance.")
+                        sys.exit()
+                        
+
+
             except Exception as e:
                 print(e)
                 sys.exit()
+
         if not args.file:
             print("ERROR: Missing a required argument: -f/--file")
             sys.exit()
@@ -296,6 +317,22 @@ This application is an unofficial LAMMPS addon that helps to create necessary in
             if args.from_instance:
                 args.scale = parsed_file["scale"]
             dm.multiply_region(helper_functions.str2tuple(args.scale))
+
+        elif args.mod_mode == "shortener":
+            if args.shorten_block:
+                try:
+                    dm.shorten_block(*tuple(map(int, helper_functions.str2tuple_any(args.shorten_block))))
+                except:
+                    print("Error: Incorrect sortener arguments. Please refer to the help message by running: lmp_auto modifier shortener -h")
+                    sys.exit()
+            if args.shorten_delimiter:
+                try:
+                    str_tuple = helper_functions.str2tuple_any(args.shorten_delimiter)
+                    int_args = tuple(map(int, str_tuple[:-1]))
+                    dm.shorten_delim(*int_args, str_tuple[-1])
+                except Exception as e:
+                    print(e, "Error: Incorrect sortener arguments. Please refer to the help message by running: lmp_auto modifier shortener -h")
+
     
     
     
