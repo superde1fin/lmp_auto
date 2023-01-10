@@ -177,6 +177,8 @@ else
             ../install_boost
         else
 			echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+        fi
+    fi
 fi
 
 
