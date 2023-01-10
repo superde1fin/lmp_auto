@@ -18,12 +18,26 @@ if [[ "$*" == *"python3"* ]]
 then
 	echo -e "Python3 is not installed...\nStarting installation\n"
 	sudo $inst_manager install python3
+    readarray -d ' ' -t strarr <<< "$(python3 --version)"
+    echo "${strarr[1]}" >> .pyver.txt
 fi
 
 if [[ "$*" == *"pip3"* ]]
 then
 	echo -e "pip3 is not installed...\nStarting installation\n"
 	sudo $inst_manager install python3-pip
+fi
+
+if [[ "$*" == *"gmp"* ]]
+then
+	echo -e "Library gmp is not installed...\nStarting installation\n"
+	sudo $inst_manager install libgmp3-dev
+fi
+
+if [[ "$*" == *"ssl"* || "$*" == *"crypto"* ]]
+then
+	echo -e "Library ssl or crypto is not installed...\nStarting installation\n"
+	sudo $inst_manager install libssl-dev
 fi
 
 pip3 install -r requirements.txt

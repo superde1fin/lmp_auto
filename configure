@@ -18,9 +18,36 @@ function read_answer(){
 	echo $answer
 }
 
+function check_pymod(){
+    if ! pip3 list | grep -F "$1" &> /dev/null
+
+    then
+        echo -e "${RED}ERROR: Python module $1 not found. \u2716${NC}\n"
+        missing_reqs+=("$1")
+    else
+        echo -e "${GREEN}Found "$(pip3 list | grep -F "$1")" \u2714${NC}\n"
+    fi
+}
+
+function check_cpplib(){
+    templibname="$(ldconfig -p | grep "$1")"
+    if [ -z "$templibname" ]
+    then
+        echo -e "${RED}ERROR: Library $1 not found. \u2716${NC}\n"
+        missing_reqs+=("$1")
+    else
+        readarray -d ' ' -t strarr <<< $templibname 
+        echo -e "${GREEN}Found "${strarr[${#strarr[@]} - 1]}" \u2714${NC}\n"
+    fi
+}
+
 inst_path="/usr/local/bin/"
 new_path=false
 install_missing=false
+python_inlude="/usr/include"
+python_lib="/usr/lib"
+boost_lib="/usr/local/lib"
+boost_include="/usr/local/include"
 #Scan the command line arguments
 for i in "$@"; do
   case $i in
@@ -30,6 +57,18 @@ for i in "$@"; do
 		shift;;
 	-i=*|--install-missing=*)
 		install_missing="${i#*=}"
+		shift;;
+	-bi=*|--boost-include=*)
+		boost_include="${i#*=}"
+		shift;;
+	-bl=*|--boost-lib=*)
+		boost_lib="${i#*=}"
+		shift;;
+	-pi=*|--python-include=*)
+		python_include="${i#*=}"
+		shift;;
+	-bl=*|--python-lib=*)
+		python_lib="${i#*=}"
 		shift;;
 	-*|--*)
 	  echo -e "${RED}Unknown Argument: $i${NC}\n"
@@ -60,6 +99,8 @@ then
 	missing_reqs+=("python3")
 else
 	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
+    readarray -d ' ' -t strarr <<< "$(python3 --version)"
+    echo "${strarr[1]}" >> .pyver.txt
 fi
 
 #pip3
@@ -72,32 +113,26 @@ else
 fi
 
 #Nuitka
-if ! pip3 list | grep -F "Nuitka" &> /dev/null
-
-then
-	echo -e "${RED}ERROR: Python module Nuitka not found. \u2716${NC}\n"
-	missing_reqs+=("nuitka")
-else
-	nuitka_version="$(pip3 list | grep -F "Nuitka")"
-	echo -e "${GREEN}Found $nuitka_version \u2714${NC}\n"
-	unset nuitka_version
-fi
+check_pymod "Nuitka"
 
 #numpy
-if ! pip3 list | grep -F "numpy" &> /dev/null
-then
-	echo -e "${RED}ERROR: Python module numpy not found. \u2716${NC}\n"
-	missing_reqs+=("numpy")
-else
-	numpy_version="$(pip3 list | grep -F "numpy")"
-	echo -e "${GREEN}Found $numpy_version \u2714${NC}\n"
-	unset numpy_version
-fi
+check_pymod "numpy"
+
+#gmp
+check_cpplib "gmp"
+
+#ssl
+check_cpplib "ssl"
+
+#crypto
+check_cpplib "crypto"
+
+
 
 #Check that all of the requirements have been satisfied
 if (( ${#missing_reqs[@]} > 0 ))
 then
-	echo -e "${RED}Some of the requirements have not been satisfied\nPlease install them and rerun this configuration script${NC}"
+	echo -e "${RED}Some of the requirements have not been satisfied${NC}"
 	echo -e "Missing requirements: ${missing_reqs[*]}\n"
 	
 	if ! $install_missing
@@ -126,6 +161,24 @@ then
 else
 	echo -e "${GREEN}All of the requriments are satisfied. Starting to build the binary files.${NC}\n"
 fi
+
+#boost
+if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python${python3_version/./}.so" ]
+then
+    echo -e "${GREEN}Boost has been correctly installed with python$python3_version \u2714${NC}\n"
+else
+    echo -e "${RED}ERROR: Incorrect boost installation \u2716${NC}\n"
+    if [ -f "install_boost" ]
+    then
+        ./install_boost
+    else
+        if [ -f "../install_boost" ]
+        then
+            ../install_boost
+        else
+			echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+fi
+
 
 #Compile python files
 if [ -f "lmp_auto.py" ]
