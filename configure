@@ -30,14 +30,13 @@ function check_pymod(){
 }
 
 function check_cpplib(){
-    #templibname="$(ldconfig -p | grep "lib$1.so ")"
     templibname="$(whereis "lib$1.so")"
-    if [ -z "$templibname" ]
+    readarray -d ' ' -t strarr <<< $templibname 
+    if [ "${#strarr[@]}" -le 1 ]
     then
         echo -e "${RED}ERROR: Library $1 not found. \u2716${NC}\n"
         missing_reqs+=("$1")
     else
-        readarray -d ' ' -t strarr <<< $templibname 
         echo -e "${GREEN}Found "${strarr[${#strarr[@]} - 1]}" \u2714${NC}\n"
     fi
 }
