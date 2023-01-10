@@ -30,7 +30,8 @@ function check_pymod(){
 }
 
 function check_cpplib(){
-    templibname="$(ldconfig -p | grep "lib$1.so ")"
+    #templibname="$(ldconfig -p | grep "lib$1.so ")"
+    templibname="$(whereis "lib$1.so")"
     if [ -z "$templibname" ]
     then
         echo -e "${RED}ERROR: Library $1 not found. \u2716${NC}\n"
