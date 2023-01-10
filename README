@@ -12,7 +12,8 @@ Use with installation (preferred):
 
 1. Navigate to a folder with lmp_auto project
 2. Create a build directory by executing: mkdir build && cd build
-3. Run the configuration file: ../configure --prefix=/path/to/installation --install-requirements=true
+3. Run the configuration file: ../configure --prefix=/path/to/installation --install-requirements=true --boost-include=/path/to/boost/headers --boost-lib=/path/to/libboost_python*.so/file --python-include=/path/to/python/headers --python-lib=/path/to/libpython*.so/file
+3.5 Comments: None of these positional arguments are required as there are default directories already specified in the script
 4. Use the lmp_auto binary: lmp_auto.py (make sure the installation directory is in your $PATH variable by executing: echo $PATH
 
 Instructions for setup file format:
