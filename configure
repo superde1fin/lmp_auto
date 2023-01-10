@@ -164,23 +164,37 @@ else
 fi
 
 #boost
-if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python$(cat .pyver.txt).so" ]
+pv=$(cat .pyver.txt)
+if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python"${pv/./}".so" ]
 then
     echo -e "${GREEN}Boost has been correctly installed with python$(cat .pyver.txt) \u2714${NC}\n"
 else
     echo -e "${RED}ERROR: Incorrect boost installation \u2716${NC}\n"
-    if [ -f "install_boost" ]
+
+	if ! $install_missing
+	then
+		if $( read_answer "Would you like to install boost?" )
+		then
+			install_missing=true
+		fi
+	fi
+	if $install_missing
     then
-#        ./install_boost
-        echo "install boost"
-    else
-        if [ -f "../install_boost" ]
+        if [ -f "install_boost" ]
         then
-#            ../install_boost
-            echo "install boost"
+            ./install_boost
+    #        echo "install boost"
         else
-			echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+            if [ -f "../install_boost" ]
+            then
+                ../install_boost
+    #            echo "install boost"
+            else
+                echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+            fi
         fi
+    else
+        exit
     fi
 fi
 
@@ -201,13 +215,13 @@ fi
 
 
 #Compile python files
-if [ -f "python_part/lmp_auto.py" ] && [ -f "python_part/CONSTANTS.PY" ] && [ -f "python_part/DataGenerator.py" ] && [ -f "python_part/DataModifier.py" ] && [ -f "python_part/helper_functions.py" ] && [ -f "python_part/Logger.py" ]
+if [ -f "python_part/lmp_auto.py" ] && [ -f "python_part/CONSTANTS.py" ] && [ -f "python_part/DataGenerator.py" ] && [ -f "python_part/DataModifier.py" ] && [ -f "python_part/helper_functions.py" ] && [ -f "python_part/Logger.py" ]
 then
 	python3 -m nuitka --follow-imports python_part/lmp_auto.py 
 else
-if [ -f "../python_part/lmp_auto.py" ] && [ -f "../python_part/CONSTANTS.PY" ] && [ -f "../python_part/DataGenerator.py" ] && [ -f "../python_part/DataModifier.py" ] && [ -f "../python_part/helper_functions.py" ] && [ -f "../python_part/Logger.py" ]
+if [ -f "../python_part/lmp_auto.py" ] && [ -f "../python_part/CONSTANTS.py" ] && [ -f "../python_part/DataGenerator.py" ] && [ -f "../python_part/DataModifier.py" ] && [ -f "../python_part/helper_functions.py" ] && [ -f "../python_part/Logger.py" ]
 	then
-		sudo python3 -m nuitka --follow-imports ../python_part/lmp_auto.py 
+		python3 -m nuitka --follow-imports ../python_part/lmp_auto.py 
 	else
 		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build or main project folder.\n"
         exit

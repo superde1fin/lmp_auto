@@ -1,9 +1,12 @@
 #!/bin/bash
 
-mkdir boost_dir && cd boost_dir
-wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
-tar -xzvf boost_1_81_0.tar.gz
+cd boost_dir
+#mkdir boost_dir && cd boost_dir
+#wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
+#tar -xzvf boost_1_81_0.tar.gz
 cd boost_1_81_0
-python3_version="$(cat .pytver.txt)"
+python3_version="$(cat ../../.pyver.txt)"
+echo -e "Installing boost with python$python3_version"
 ./bootstrap.sh --with-libraries=python --with-python="python$python3_version"
 sudo ./b2 install
+cd ../..
