@@ -19,7 +19,8 @@ then
 	echo -e "Python3 is not installed...\nStarting installation\n"
 	sudo $inst_manager install python3
     readarray -d ' ' -t strarr <<< "$(python3 --version)"
-    echo "${strarr[1]}" >> .pyver.txt
+    readarray -d '.' -t strarr <<< "${strarr[1]}"
+    echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
 fi
 
 if [[ "$*" == *"pip3"* ]]

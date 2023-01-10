@@ -2,7 +2,9 @@
 
 # location of the Python header files
 PYTHON_VERSION = 3.10
-PYTHON_INCLUDE = /usr/include/python$(PYTHON_VERSION)
+#PYTHON_INCLUDE = /usr/include/python$(PYTHON_VERSION)
+PYTHON_INC= /usr/include/
+PYTHON_LIB = /usr/lib
 
 # location of the Boost Python include files and library
 BOOST_INC = /usr/local/include
@@ -13,9 +15,9 @@ TARGET = shrt_lib
 CFLAGS = --std=c++11
 
 $(TARGET).so: $(TARGET).o
-	g++ -shared -Wl,--export-dynamic -Wl,--no-undefined $(TARGET).o -L$(BOOST_LIB) -l:libboost_python$(subst .,,$(PYTHON_VERSION)).so -L/usr/lib/python$(PYTHON_VERSION)/config -lpython$(PYTHON_VERSION) -o $(TARGET).so $(CFLAGS) -lgmp -lssl -lcrypto
+	g++ -shared -Wl,--export-dynamic -Wl,--no-undefined $(TARGET).o -L$(BOOST_LIB) -l:libboost_python$(subst .,,$(PYTHON_VERSION)).so -L$(PYTHON_LIB)/python$(PYTHON_VERSION)/config -lpython$(PYTHON_VERSION) -o $(TARGET).so $(CFLAGS) -lgmp -lssl -lcrypto
 
 $(TARGET).o: $(TARGET).cpp shortener.hpp shortener.cpp Makefile
-	g++ -I$(PYTHON_INCLUDE) -I$(BOOST_INC) -fPIC -c $(TARGET).cpp $(CFLAGS)
+	g++ -I$(PYTHON_INC)/python$(PYTHON_VERSION) -I$(BOOST_INC) -fPIC -c $(TARGET).cpp $(CFLAGS)
 
 all: $(TARGET).so

@@ -5,6 +5,5 @@ wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81
 tar -xzvf boost_1_81_0.tar.gz
 cd boost_1_81_0
 python3_version="$(cat .pytver.txt)"
-rm .pyver.txt
 ./bootstrap.sh --with-libraries=python --with-python="python$python3_version"
 sudo ./b2 install

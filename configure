@@ -30,7 +30,7 @@ function check_pymod(){
 }
 
 function check_cpplib(){
-    templibname="$(ldconfig -p | grep "$1")"
+    templibname="$(ldconfig -p | grep "lib$1.so ")"
     if [ -z "$templibname" ]
     then
         echo -e "${RED}ERROR: Library $1 not found. \u2716${NC}\n"
@@ -44,7 +44,7 @@ function check_cpplib(){
 inst_path="/usr/local/bin/"
 new_path=false
 install_missing=false
-python_inlude="/usr/include"
+python_include="/usr/include"
 python_lib="/usr/lib"
 boost_lib="/usr/local/lib"
 boost_include="/usr/local/include"
@@ -100,7 +100,8 @@ then
 else
 	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
     readarray -d ' ' -t strarr <<< "$(python3 --version)"
-    echo "${strarr[1]}" >> .pyver.txt
+    readarray -d '.' -t strarr <<< "${strarr[1]}"
+    echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
 fi
 
 #pip3
@@ -163,35 +164,53 @@ else
 fi
 
 #boost
-if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python${python3_version/./}.so" ]
+if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python$(cat .pyver.txt).so" ]
 then
-    echo -e "${GREEN}Boost has been correctly installed with python$python3_version \u2714${NC}\n"
+    echo -e "${GREEN}Boost has been correctly installed with python$(cat .pyver.txt) \u2714${NC}\n"
 else
     echo -e "${RED}ERROR: Incorrect boost installation \u2716${NC}\n"
     if [ -f "install_boost" ]
     then
-        ./install_boost
+#        ./install_boost
+        echo "install boost"
     else
         if [ -f "../install_boost" ]
         then
-            ../install_boost
+#            ../install_boost
+            echo "install boost"
         else
 			echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
         fi
     fi
 fi
 
+#Compile the shortener class into a python module
+if [ -f "cpp_part/shortener.cpp" ] && [ -f "cpp_part/shortener.hpp" ] && [ -f "cpp_part/shrt_lib.cpp" ]
+then
+    make -C "cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib"
+else
+    if [ -f "../cpp_part/shortener.cpp" ] && [ -f "../cpp_part/shortener.hpp" ] && [ -f "../cpp_part/shrt_lib.cpp" ]
+    then
+        make -C "../cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib"
+    else
+        echo -e "${RED}ERROR: Some of the shortener files have been moved. Please perform a git pull to acquire them.${NC}"
+        exit
+    fi
+fi
+
+
 
 #Compile python files
-if [ -f "lmp_auto.py" ]
+if [ -f "python_part/lmp_auto.py" ] && [ -f "python_part/CONSTANTS.PY" ] && [ -f "python_part/DataGenerator.py" ] && [ -f "python_part/DataModifier.py" ] && [ -f "python_part/helper_functions.py" ] && [ -f "python_part/Logger.py" ]
 then
 	python3 -m nuitka --follow-imports python_part/lmp_auto.py 
 else
-	if [ -f "../lmp_auto.py" ]
+if [ -f "../python_part/lmp_auto.py" ] && [ -f "../python_part/CONSTANTS.PY" ] && [ -f "../python_part/DataGenerator.py" ] && [ -f "../python_part/DataModifier.py" ] && [ -f "../python_part/helper_functions.py" ] && [ -f "../python_part/Logger.py" ]
 	then
 		sudo python3 -m nuitka --follow-imports ../python_part/lmp_auto.py 
 	else
 		echo -e "${RED}ERROR: Configure file is run from an incorrect directory.${NC}\nPlease run configure file from the build or main project folder.\n"
+        exit
 	fi
 fi
 
