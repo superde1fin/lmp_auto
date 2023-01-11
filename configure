@@ -149,7 +149,7 @@ then
 		if [ -f "install_requirements" ]
 		then
 			./install_requirements "{$missing_reqs[*]}"
-		elif [ -f "../install_requirements"]
+		elif [ -f "../install_requirements" ]
 		then
 			../install_requirements "{$missing_reqs[*]}"
 		else

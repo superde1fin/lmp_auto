@@ -41,6 +41,16 @@ then
 	sudo $inst_manager install libssl-dev
 fi
 
-pip3 install -r requirements.txt
+if [ -f "requirements.txt" ]
+then
+    pip3 install -r requirements.txt
+else
+    if [ -f "../requirements.txt" ]
+    then
+        pip3 install -r ../requirements.txt
+    else
+        echo -e "ERROR: The requirements file has been moved, please perform a git pull to acquire it."
+    fi
+fi
 
 
