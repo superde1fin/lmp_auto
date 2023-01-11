@@ -26,8 +26,12 @@ if [[ "$*" == *"python3"* ]]
 then
 	echo -e "Python3 is not installed...\nStarting installation\n"
 	sudo $inst_manager install $python_name
-    readarray -d ' ' -t strarr <<< "$(python3 --version)"
-    readarray -d '.' -t strarr <<< "${strarr[1]}"
+    IFS=' '
+    read -a strarr <<< "$(python3 --version)"
+    IFS='.'
+    read -a strarr <<< "${strarr[1]}"
+#    readarray -d ' ' -t strarr <<< "$(python3 --version)"
+#    readarray -d '.' -t strarr <<< "${strarr[1]}"
     echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
 fi
 
