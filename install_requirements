@@ -1,11 +1,19 @@
 #!/bin/bash
 
+gpp_name="g++"
+gmp_name="libgmp3-dev"
+ssl_name="libssl-dev"
+python_name="python3"
 if command -v apt > /dev/null
 then
 	inst_manager="apt"
 elif command -v yum > /dev/null
 then
 	inst_manager="yum"
+    gpp_name="gcc-c++"
+    gmp_name="gmp-devel"
+    ssl_name="openssl-devel"
+    python_name="python3-devel"
 elif command -v brew > /dev/null
 then
 	inst_manager="brew"
@@ -17,7 +25,7 @@ fi
 if [[ "$*" == *"python3"* ]]
 then
 	echo -e "Python3 is not installed...\nStarting installation\n"
-	sudo $inst_manager install python3
+	sudo $inst_manager install $python_name
     readarray -d ' ' -t strarr <<< "$(python3 --version)"
     readarray -d '.' -t strarr <<< "${strarr[1]}"
     echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
@@ -38,7 +46,7 @@ fi
 if [[ "$*" == *"g++"* ]]
 then
 	echo -e "Utility g++ is not installed...\nStarting installation\n"
-	sudo $inst_manager install g++
+	sudo $inst_manager install $gpp_name
 fi
 
 if [[ "$*" == *"wget"* ]]
@@ -50,13 +58,13 @@ fi
 if [[ "$*" == *"gmp"* ]]
 then
 	echo -e "Library gmp is not installed...\nStarting installation\n"
-	sudo $inst_manager install libgmp3-dev
+	sudo $inst_manager install $gmp_name
 fi
 
 if [[ "$*" == *"ssl"* || "$*" == *"crypto"* ]]
 then
 	echo -e "Library ssl or crypto is not installed...\nStarting installation\n"
-	sudo $inst_manager install libssl-dev
+	sudo $inst_manager install $ssl_name
 fi
 
 

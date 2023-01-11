@@ -31,7 +31,9 @@ function check_pymod(){
 
 function check_cpplib(){
     templibname="$(whereis "lib$1.so")"
-    readarray -d ' ' -t strarr <<< $templibname 
+#    readarray -d ' ' -t strarr <<< $templibname 
+    IFS=' '
+    read -a strarr <<< "$templibname"
     if [ "${#strarr[@]}" -le 1 ]
     then
         echo -e "${RED}ERROR: Library $1 not found. \u2716${NC}\n"
@@ -51,6 +53,7 @@ function check_command(){
     fi
 }
 
+
 inst_path="/usr/local/bin/"
 new_path=false
 install_missing=false
@@ -58,6 +61,13 @@ python_include="/usr/include"
 python_lib="/usr/lib"
 boost_lib="/usr/local/lib"
 boost_include="/usr/local/include"
+
+
+if command -v yum > /dev/null
+then
+    python_include="/usr/lib/64"
+fi
+
 #Scan the command line arguments
 for i in "$@"; do
   case $i in
@@ -109,8 +119,12 @@ then
 	missing_reqs+=("python3")
 else
 	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
-    readarray -d ' ' -t strarr <<< "$(python3 --version)"
-    readarray -d '.' -t strarr <<< "${strarr[1]}"
+    IFS=' '
+    read -a strarr <<< "$(python3 --version)"
+    IFS='.'
+    read -a strarr <<< "${strarr[1]}"
+#    readarray -d ' ' -t strarr <<< "$(python3 --version)"
+#    readarray -d '.' -t strarr <<< "${strarr[1]}"
     echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
 fi
 
@@ -161,10 +175,10 @@ then
 		echo -e "Starting the requirements' installation tool\n"
 		if [ -f "install_requirements" ]
 		then
-			./install_requirements "{$missing_reqs[*]}"
+			sudo ./install_requirements "{$missing_reqs[*]}"
 		elif [ -f "../install_requirements" ]
 		then
-			../install_requirements "{$missing_reqs[*]}"
+			sudo ../install_requirements "{$missing_reqs[*]}"
 		else
 			echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
 		exit
