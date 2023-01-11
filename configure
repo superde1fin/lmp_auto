@@ -45,7 +45,7 @@ function check_command(){
     if ! command -v "$1" &> /dev/null
     then
         echo -e "${RED}ERROR: $1 not found. \u2716${NC}\n"
-        missing_reqs+=("pip3")
+        missing_reqs+=("$1")
     else
         echo -e "${GREEN}Found $("$1" --version) \u2714${NC}\n"
     fi
