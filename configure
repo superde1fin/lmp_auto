@@ -41,6 +41,16 @@ function check_cpplib(){
     fi
 }
 
+function check_command(){
+    if ! command -v "$1" &> /dev/null
+    then
+        echo -e "${RED}ERROR: $1 not found. \u2716${NC}\n"
+        missing_reqs+=("pip3")
+    else
+        echo -e "${GREEN}Found $("$1" --version) \u2714${NC}\n"
+    fi
+}
+
 inst_path="/usr/local/bin/"
 new_path=false
 install_missing=false
@@ -105,13 +115,16 @@ else
 fi
 
 #pip3
-if ! command -v pip3 &> /dev/null
-then
-	echo -e "${RED}ERROR: pip3 not found. \u2716${NC}\n"
-	missing_reqs+=("pip3")
-else
-	echo -e "${GREEN}Found $(pip3 --version) \u2714${NC}\n"
-fi
+check_command "pip3"
+
+#gcc
+check_command "gcc"
+
+#g++
+check_command "g++"
+
+#wget
+check_command "wget"
 
 #Nuitka
 check_pymod "Nuitka"

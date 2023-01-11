@@ -29,6 +29,24 @@ then
 	sudo $inst_manager install python3-pip
 fi
 
+if [[ "$*" == *"gcc"* ]]
+then
+	echo -e "Utility gcc is not installed...\nStarting installation\n"
+	sudo $inst_manager install gcc
+fi
+
+if [[ "$*" == *"g++"* ]]
+then
+	echo -e "Utility g++ is not installed...\nStarting installation\n"
+	sudo $inst_manager install g++
+fi
+
+if [[ "$*" == *"wget"* ]]
+then
+	echo -e "Utility wget is not installed...\nStarting installation\n"
+	sudo $inst_manager install wget
+fi
+
 if [[ "$*" == *"gmp"* ]]
 then
 	echo -e "Library gmp is not installed...\nStarting installation\n"
@@ -40,6 +58,7 @@ then
 	echo -e "Library ssl or crypto is not installed...\nStarting installation\n"
 	sudo $inst_manager install libssl-dev
 fi
+
 
 if [ -f "requirements.txt" ]
 then
