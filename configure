@@ -31,7 +31,6 @@ function check_pymod(){
 
 function check_cpplib(){
     templibname="$(whereis "lib$1.so")"
-#    readarray -d ' ' -t strarr <<< $templibname 
     IFS=' '
     read -a strarr <<< "$templibname"
     if [ "${#strarr[@]}" -le 1 ]
@@ -61,11 +60,13 @@ python_include="/usr/include"
 python_lib="/usr/lib"
 boost_lib="/usr/local/lib"
 boost_include="/usr/local/include"
-
+py_use_def="true"
 
 if command -v yum > /dev/null
 then
-    python_include="/usr/lib/64"
+    python_lib="/usr/lib64"
+    version_append="m"
+    py_use_def="false"
 fi
 
 #Scan the command line arguments
@@ -123,9 +124,7 @@ else
     read -a strarr <<< "$(python3 --version)"
     IFS='.'
     read -a strarr <<< "${strarr[1]}"
-#    readarray -d ' ' -t strarr <<< "$(python3 --version)"
-#    readarray -d '.' -t strarr <<< "${strarr[1]}"
-    echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
+    echo "${strarr[0]}.${strarr[1]}$version_append" >> .pyver.txt
 fi
 
 #pip3
@@ -175,10 +174,10 @@ then
 		echo -e "Starting the requirements' installation tool\n"
 		if [ -f "install_requirements" ]
 		then
-			sudo ./install_requirements "{$missing_reqs[*]}"
+			sudo ./install_requirements "${missing_reqs[@]}"
 		elif [ -f "../install_requirements" ]
 		then
-			sudo ../install_requirements "{$missing_reqs[*]}"
+			sudo ../install_requirements "${missing_reqs[@]}"
 		else
 			echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
 		exit
@@ -192,9 +191,10 @@ fi
 
 #boost
 pv=$(cat .pyver.txt)
+pv="${pv/m/}"
 if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python"${pv/./}".so" ]
 then
-    echo -e "${GREEN}Boost has been correctly installed with python$(cat .pyver.txt) \u2714${NC}\n"
+    echo -e "${GREEN}Boost has been correctly installed with python$pv \u2714${NC}\n"
 else
     echo -e "${RED}ERROR: Incorrect boost installation \u2716${NC}\n"
 
@@ -228,11 +228,11 @@ fi
 #Compile the shortener class into a python module
 if [ -f "cpp_part/shortener.cpp" ] && [ -f "cpp_part/shortener.hpp" ] && [ -f "cpp_part/shrt_lib.cpp" ]
 then
-    make -C "cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib"
+    make -C "cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
 else
     if [ -f "../cpp_part/shortener.cpp" ] && [ -f "../cpp_part/shortener.hpp" ] && [ -f "../cpp_part/shrt_lib.cpp" ]
     then
-        make -C "../cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib"
+        make -C "../cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
     else
         echo -e "${RED}ERROR: Some of the shortener files have been moved. Please perform a git pull to acquire them.${NC}"
         exit
