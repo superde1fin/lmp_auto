@@ -3,7 +3,7 @@
 # location of the Python header files
 PYTHON_VERSION = 3.10
 #PYTHON_INCLUDE = /usr/include/python$(PYTHON_VERSION)
-PYTHON_INC= /usr/include/
+PYTHON_INC= /usr/include
 PYTHON_LIB = /usr/lib
 PY_USE_DEF="true"
 ifeq ($(PY_USE_DEF), "ture")

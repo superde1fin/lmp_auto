@@ -32,9 +32,9 @@ def decompose(molecules_dict):
 def str2tuple(tuple_string):
     tuple_string = tuple_string.replace('(', '')
     tuple_string = tuple_string.replace(')', '')
-    tuple_string = tuple_string.replace(' ', '')
+    #tuple_string = tuple_string.replace(' ', '')
     try:
-        result = tuple(map(int, tuple_string.split(',')))
+        result = tuple(map(int, [ el.strip() for el in tuple_string.split(',')]))
         return result
     except:
         raise Exception("Non-int elements in a tuple")
@@ -42,8 +42,8 @@ def str2tuple(tuple_string):
 def str2tuple_any(tuple_string):
     tuple_string = tuple_string.replace('(', '')
     tuple_string = tuple_string.replace(')', '')
-    tuple_string = tuple_string.replace(' ', '')
-    return tuple(tuple_string.split(','))
+    #tuple_string = tuple_string.replace(' ', '')
+    return tuple([el.strip() for el in tuple_string.split(',')])
 
 def parse_setup_file(filename):
     result_dict = {}
