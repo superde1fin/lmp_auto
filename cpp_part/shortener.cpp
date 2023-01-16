@@ -10,6 +10,7 @@ int Shortener::shorten_file(int start, int end, int step, int block_size){
     int counter;
     for(counter = 1; counter < start; counter++){
         getline(input, line);
+        output << line << endl;
         }
 
     //Scan through lines and only write those which make up blocks devisible by step
@@ -35,6 +36,7 @@ int Shortener::shorten_file(int start, int end, int step, string delim){
     int counter;
     for(counter = 1; counter < start; counter++){
         getline(input, line);
+        output << line << endl;
         }
 
     //Record all the lines after start and before first delimetor
