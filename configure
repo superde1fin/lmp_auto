@@ -124,7 +124,8 @@ else
     read -a strarr <<< "$(python3 --version)"
     IFS='.'
     read -a strarr <<< "${strarr[1]}"
-    echo "${strarr[0]}.${strarr[1]}$version_append" >> .pyver.txt
+    IFS=''
+    echo "${strarr[0]}.${strarr[1]}$version_append" > .pyver.txt
 fi
 
 #pip3

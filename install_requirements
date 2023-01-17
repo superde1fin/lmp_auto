@@ -43,7 +43,8 @@ for i in "$@"; do
         read -a strarr <<< "$(python3 --version)"
         IFS='.'
         read -a strarr <<< "${strarr[1]}"
-        echo "${strarr[0]}.${strarr[1]}$version_append" >> .pyver.txt
+        IFS=''
+        echo "${strarr[0]}.${strarr[1]}$version_append" > .pyver.txt
         shift;;
     "pip3")
         echo -e "pip3 is not installed...\nStarting installation\n"
