@@ -23,16 +23,6 @@ else
 	exit
 fi
 
-#if [[ "$*" == *"python3"* ]]
-#then
-#	echo -e "Python3 is not installed...\nStarting installation\n"
-#	sudo $inst_manager install $python_name
-#    IFS=' '
-#    read -a strarr <<< "$(python3 --version)"
-#    IFS='.'
-#    read -a strarr <<< "${strarr[1]}"
-#    echo "${strarr[0]}.${strarr[1]}" >> .pyver.txt
-#fi
 ssl_crypto_installed=false
 for i in "$@"; do
     case "$i" in
@@ -44,7 +34,7 @@ for i in "$@"; do
         IFS='.'
         read -a strarr <<< "${strarr[1]}"
         IFS=''
-        echo "${strarr[0]}.${strarr[1]}$version_append" > .pyver.txt
+        python_version="${strarr[0]}.${strarr[1]}$version_append"
         shift;;
     "pip3")
         echo -e "pip3 is not installed...\nStarting installation\n"
@@ -81,42 +71,6 @@ for i in "$@"; do
       ;;
     esac
 done
-#if [[ "$*" == *"pip3"* ]]
-#then
-#	echo -e "pip3 is not installed...\nStarting installation\n"
-#	sudo $inst_manager install python3-pip
-#fi
-#
-#if [[ "$*" == *"gcc"* ]]
-#then
-#	echo -e "Utility gcc is not installed...\nStarting installation\n"
-#	sudo $inst_manager install gcc
-#fi
-#
-#if [[ "$*" == *"g++"* ]]
-#then
-#	echo -e "Utility g++ is not installed...\nStarting installation\n"
-#	sudo $inst_manager install $gpp_name
-#fi
-#
-#if [[ "$*" == *"wget"* ]]
-#then
-#	echo -e "Utility wget is not installed...\nStarting installation\n"
-#	sudo $inst_manager install wget
-#fi
-#
-#if [[ "$*" == *"gmp"* ]]
-#then
-#	echo -e "Library gmp is not installed...\nStarting installation\n"
-#	sudo $inst_manager install $gmp_name
-#fi
-#
-#if [[ "$*" == *"ssl"* || "$*" == *"crypto"* ]]
-#then
-#	echo -e "Library ssl or crypto is not installed...\nStarting installation\n"
-#	sudo $inst_manager install $ssl_name
-#fi
-
 
 if [ -f "requirements.txt" ]
 then

@@ -125,7 +125,7 @@ else
     IFS='.'
     read -a strarr <<< "${strarr[1]}"
     IFS=''
-    echo "${strarr[0]}.${strarr[1]}$version_append" > .pyver.txt
+    python_version="${strarr[0]}.${strarr[1]}$version_append"
 fi
 
 #pip3
@@ -175,10 +175,10 @@ then
 		echo -e "Starting the requirements' installation tool\n"
 		if [ -f "install_requirements" ]
 		then
-			sudo ./install_requirements "${missing_reqs[@]}"
+			sudo . ./install_requirements "${missing_reqs[@]}"
 		elif [ -f "../install_requirements" ]
 		then
-			sudo ../install_requirements "${missing_reqs[@]}"
+			sudo . ../install_requirements "${missing_reqs[@]}"
 		else
 			echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
 		exit
@@ -191,7 +191,7 @@ else
 fi
 
 #boost
-pv=$(cat .pyver.txt)
+pv=python_version
 pv="${pv/m/}"
 if [ -d "$boost_include/boost" ] && [ -f "$boost_lib/libboost_python"${pv/./}".so" ]
 then
@@ -210,13 +210,11 @@ else
     then
         if [ -f "install_boost" ]
         then
-            ./install_boost
-    #        echo "install boost"
+            . ./install_boost
         else
             if [ -f "../install_boost" ]
             then
-                ../install_boost
-    #            echo "install boost"
+                . ../install_boost
             else
                 echo -e "${RED}ERROR: The boost installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
             fi
@@ -229,11 +227,11 @@ fi
 #Compile the shortener class into a python module
 if [ -f "cpp_part/shortener.cpp" ] && [ -f "cpp_part/shortener.hpp" ] && [ -f "cpp_part/shrt_lib.cpp" ]
 then
-    make -C "cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
+    make -C "cpp_part" PYTHON_VERSION="$python_version" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
 else
     if [ -f "../cpp_part/shortener.cpp" ] && [ -f "../cpp_part/shortener.hpp" ] && [ -f "../cpp_part/shrt_lib.cpp" ]
     then
-        make -C "../cpp_part" PYTHON_VERSION="$(cat .pyver.txt)" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
+        make -C "../cpp_part" PYTHON_VERSION="$python_version" PYTHON_INC="$python_include" PYTHON_LIB="$python_lib" BOOST_INC="$boost_include" BOOST_LIB="$boost_lib" PY_USE_DEF=$py_use_def
     else
         echo -e "${RED}ERROR: Some of the shortener files have been moved. Please perform a git pull to acquire them.${NC}"
         exit
