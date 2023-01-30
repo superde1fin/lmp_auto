@@ -245,7 +245,7 @@ then
 	if $install_missing
 	then
         echo -e "Starting the requirements' installation tool\n"
-        if noroot
+        if $noroot
         then
             if [ contains_string "gcc" "${missing_reqs[@]}" ] || [ contains_string "wget" "${missing_reqs[@]}" ]
             then
