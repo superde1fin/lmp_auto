@@ -254,10 +254,10 @@ then
             fi
             if [ -f "install_noroot" ]
             then
-                sudo . ./install_noroot "${missing_reqs[@]}"
+                . ./install_noroot "${missing_reqs[@]}"
             elif [ -f "../install_noroot" ]
             then
-                sudo . ../install_noroot "${missing_reqs[@]}"
+                . ../install_noroot "${missing_reqs[@]}"
             else
                 echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
             exit
@@ -289,6 +289,7 @@ then
     echo -e "${GREEN}All of the missing requirements have been satisfied\nStarting to build boost${NC}\n\n"
 else
     echo -e "${RED}ERROR: Falied to install these requirements: ${missing_reqs[@]}. Please try to install them yourself.\n\n"
+    exit
 fi
 
 #boost
