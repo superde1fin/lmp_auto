@@ -1,0 +1,123 @@
+#!/bin/bash
+
+#links
+#python 3.10.9
+python3_link="https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz"
+make_link="https://ftp.gnu.org/gnu/make/make-4.4.tar.gz"
+ffi_link="https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz"
+zlib_link="https://zlib.net/zlib-1.2.13.tar.gz"
+gmp_link="https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.bz2"
+m4_link="https://ftp.gnu.org/gnu/m4/m4-1.4.tar.gz"
+ssl_link="https://www.openssl.org/source/openssl-3.0.7.tar.gz"
+ssl_crypto_installed=false
+for i in "$@"; do
+    case "$i" in
+    "make")
+        echo -e "make is not installed...\nStarting installation\n"
+        wget $make_link
+        tar -xzvf make-*.*.tar.gz
+        cd make-*.*
+        ./configure --prefix=$inst_path --disable-dependency-tracking
+        ./build.sh
+        ./make install
+        export PATh=$inst_path/bin:$PATH
+        cd ..
+        shift;;
+    "ffi")
+        echo -e "Library ffi is not installed...\nStarting installation\n"
+        wget $ffi_link
+        tar -xzvf libffi-*.*.*.tar.gz
+        cd libffi-*.*.*
+        ./configure --prefin=$inst_path
+        make -j$core_number
+        make install
+        ecport LD_LIBRARY_PATH=$inst_path/lib:$LD_LIBRARY_PATH
+        cd ..
+        shift;;
+    "zlib")
+        echo -e "Library zlib is not installed...\nStarting installation\n"
+        wget $zlib_link
+        tar -xzvf zlib-*.*.*.tar.gz
+        cd zlib-*.*.*
+        ./configure --prefin=$inst_path
+        make -j$core_number
+        make install
+        cd ..
+        shift;;
+    "pip3")
+        echo -e "pip3 is not installed...\nRecording the need for installation"
+        with_pip="--with-ensurepip=install"
+        shift;;
+    "python3")
+        echo -e "Python3 is not installed...\nStarting installation\n"
+        #Python installation start
+        wget $python3_link
+        tar -xzvf Python-3.*.*.tgz
+        cd Python-3.*.*
+        ./configure --prefix=$inst_path --enable-shared --enable-optimizations $with_pip 
+        make -j$core_number
+        make install
+        cd ..
+        #Python installation end
+        IFS=' '
+        IFS=' '
+        read -a strarr <<< "$(python3 --version)"
+        IFS='.'
+        read -a strarr <<< "${strarr[1]}"
+        IFS=''
+        python_version="${strarr[0]}.${strarr[1]}$version_append"
+        shift;;
+    "m4")
+        echo -e "Library m4 is not installed...\nStarting installation\n"
+        wget $m4_link
+        tar -xzvf m4-*.*.tar.gz
+        cd m4-*.*
+        ./configure --prefix=$inst_path
+        make -j$core_number
+        make install
+        cd ..
+        shift;;
+    "gmp")
+        echo -e "Library gmp is not installed...\nStarting installation\n"
+        wget $gmp_link
+        tar -xvf gmp-*.*.*.tar.bz2
+        cd gmp-*.*.*
+        ./configure --prefix=$inst_path
+        make -j$core_number
+        make install
+        cd ..
+        shift;;
+    "ssl"|"crypto")
+        if ! $ssl_crypto_installed
+        then
+            echo -e "Library ssl or crypto is not installed...\nStarting installation\n"
+            wget $ssl_link
+            tar -xzvf openssl-*.*.*.tar.gz
+            cd openssl-*.*.*
+            ./config --prefix=$inst_path
+            make -j$core_number
+            make install
+            ssl_crypto_installed=true
+        fi
+        shift;;
+    -*|--*)
+      echo -e "${RED}Unknown Requirements in: $@${NC}\n"
+      exit 1;;
+    *)
+      ;;
+    esac
+done
+
+if [ -f "requirements.txt" ]
+then
+    python3 -m pip install -r requirements.txt
+else
+    if [ -f "../requirements.txt" ]
+    then
+        python3 -m pip install -r ../requirements.txt
+    else
+        echo -e "ERROR: The requirements file has been moved, please perform a git pull to acquire it."
+    fi
+fi
+
+
