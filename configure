@@ -5,6 +5,23 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 GREEN='\033[0;32m'
 
+
+#Check whether and array contains a string variable
+function contains_string(){
+    local to_find="$1"
+    shift
+    local arr=("$@")
+    for i in "${arr[@]}"
+    do
+        if [ "$i" == "$to_find" ] ; then
+            echo true
+            return
+        fi
+    done
+    echo false
+    return
+    }
+
 #Read an answer from user
 function read_answer(){
 	while true; do
@@ -52,19 +69,77 @@ function check_command(){
     fi
 }
 
+#Check the application requirements
+function check_all_reqs(){
+    #Python3
+    if ! command -v python3 &> /dev/null
+    then
+        if ! command -v python2 &> /dev/null
+        then
+            echo -e "${RED}ERROR: No python installed. \u2716${NC}\\nPlease install Python3"
+        else
+            python2_version=$(python2 -V 2>&1)
+            echo -e "${RED}ERROR: Python3 not found. \u2716${NC}\nLatest version of python is $python2_version\nPlease install python3\n"
+            unset python2_version
+        fi
+        missing_reqs+=("python3")
+    else
+        echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
+        IFS=' '
+        read -a strarr <<< "$(python3 --version)"
+        IFS='.'
+        read -a strarr <<< "${strarr[1]}"
+        IFS=''
+        python_version="${strarr[0]}.${strarr[1]}$version_append"
+    fi
 
-inst_path="/usr/local/bin/"
+    #pip3
+    check_command "pip3"
+
+    #gcc
+    check_command "gcc"
+
+    #g++
+    check_command "g++"
+
+    #wget
+    check_command "wget"
+
+    #Nuitka
+    check_pymod "Nuitka"
+
+    #numpy
+    check_pymod "numpy"
+
+    #gmp
+    check_cpplib "gmp"
+
+    #ssl
+    check_cpplib "ssl"
+
+    #crypto
+    check_cpplib "crypto"
+
+    if $noroot
+    then
+        check_command "make"
+        if [ contains_string "python3" "${missing_reqs[@]}" ]
+        then
+            check_cpplib "ffi"
+            check_cpplib "zlib"
+            check_cpplib "m4"
+        fi
+    fi
+    }
+
+
 new_path=false
 install_missing=false
-python_include="/usr/include"
-python_lib="/usr/lib"
-boost_lib="/usr/local/lib"
-boost_include="/usr/local/include"
 py_use_def="true"
+noroot=false
 
 if command -v yum > /dev/null
 then
-    python_lib="/usr/lib64"
     version_append="m"
     py_use_def="false"
 fi
@@ -73,23 +148,38 @@ fi
 for i in "$@"; do
   case $i in
 	-p=*|--prefix=*)
-	  inst_path="${i#*=}"
-	  new_path=true
+        inst_path="${i#*=}"
+        inst_path="${inst_path/\~/$HOME}"
+        new_path=true
+        python_include="$inst_path/include"
+        python_lib="$inst_path/lib"
+        boost_include="$inst_path/include"
+        boost_lib="$inst_path/lib"
 		shift;;
 	-i=*|--install-missing=*)
 		install_missing="${i#*=}"
 		shift;;
 	-bi=*|--boost-include=*)
 		boost_include="${i#*=}"
+	    boost_include="${boost_include/\~/$HOME}"
 		shift;;
 	-bl=*|--boost-lib=*)
 		boost_lib="${i#*=}"
+	    boost_lib="${boost_lib/\~/$HOME}"
 		shift;;
 	-pi=*|--python-include=*)
 		python_include="${i#*=}"
+	    python_include="${python_include/\~/$HOME}"
 		shift;;
-	-bl=*|--python-lib=*)
+	-bl=*|--boost-lib=*)
 		python_lib="${i#*=}"
+	    python_lib="${python_lib/\~/$HOME}"
+		shift;;
+	-nr|--noroot*)
+        noroot=true
+		shift;;
+	-cn=|--core-number=*)
+        core_number="${i#*=}"
 		shift;;
 	-*|--*)
 	  echo -e "${RED}Unknown Argument: $i${NC}\n"
@@ -99,61 +189,43 @@ for i in "$@"; do
   esac
 done
 
+if [ -z $inst_path ]
+then
+    inst_path="/usr/local/bin/"
+fi
+if [ -z $python_include ]
+then
+    python_include="/usr/include"
+fi
+if [ -z $python_lib ]
+then
+    if command -V yum
+    then
+        python_lib="/usr/lib64"
+    else
+        python_lib="/usr/lib"
+    fi
+fi
+if [ -z $boost_include ]
+then
+    boost_include="/usr/local/include"
+fi
+if [ -z $boost_lib ]
+then
+    boost_lib="/usr/local/lib"
+fi
+if [ -z core_number ]
+then
+    core_number="$(nproc)/2" | bc
+fi
+
 echo -e "\nStarting the configuration of the Lammps Automator\n"
 #Check all the requirements
 
 echo -e "Checking all the requirements...\n"
 
 declare -a missing_reqs=()
-
-#Python3
-if ! command -v python3 &> /dev/null
-then
-	if ! command -v python2 &> /dev/null
-	then
-		echo -e "${RED}ERROR: No python installed. \u2716${NC}\\nPlease install Python3"
-	else
-		python2_version=$(python2 -V 2>&1)
-		echo -e "${RED}ERROR: Python3 not found. \u2716${NC}\nLatest version of python is $python2_version\nPlease install python3\n"
-		unset python2_version
-	fi
-	missing_reqs+=("python3")
-else
-	echo -e "${GREEN}Found $(python3 --version) \u2714${NC}\n"
-    IFS=' '
-    read -a strarr <<< "$(python3 --version)"
-    IFS='.'
-    read -a strarr <<< "${strarr[1]}"
-    IFS=''
-    python_version="${strarr[0]}.${strarr[1]}$version_append"
-fi
-
-#pip3
-check_command "pip3"
-
-#gcc
-check_command "gcc"
-
-#g++
-check_command "g++"
-
-#wget
-check_command "wget"
-
-#Nuitka
-check_pymod "Nuitka"
-
-#numpy
-check_pymod "numpy"
-
-#gmp
-check_cpplib "gmp"
-
-#ssl
-check_cpplib "ssl"
-
-#crypto
-check_cpplib "crypto"
+check_all_reqs
 
 
 
@@ -172,22 +244,51 @@ then
 	fi
 	if $install_missing
 	then
-		echo -e "Starting the requirements' installation tool\n"
-		if [ -f "install_requirements" ]
-		then
-			sudo . ./install_requirements "${missing_reqs[@]}"
-		elif [ -f "../install_requirements" ]
-		then
-			sudo . ../install_requirements "${missing_reqs[@]}"
-		else
-			echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
-		exit
-		fi
+        echo -e "Starting the requirements' installation tool\n"
+        if noroot
+        then
+            if [ contains_string "gcc" "${missing_reqs[@]}" ] || [ contains_string "wget" "${missing_reqs[@]}" ]
+            then
+                echo -e "${RED}ERROR: Cannoot install gcc/wget without root privileges."
+                exit 1
+            fi
+            if [ -f "install_noroot" ]
+            then
+                sudo . ./install_noroot "${missing_reqs[@]}"
+            elif [ -f "../install_noroot" ]
+            then
+                sudo . ../install_noroot "${missing_reqs[@]}"
+            else
+                echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+            exit
+            fi
+        else
+            if [ -f "install_requirements" ]
+            then
+                sudo . ./install_requirements "${missing_reqs[@]}"
+            elif [ -f "../install_requirements" ]
+            then
+                sudo . ../install_requirements "${missing_reqs[@]}"
+            else
+                echo -e "${RED}ERROR: The requirement installation script has been moved.${NC} Please pull the repository again to acquire it.\n"
+            exit
+            fi
+        fi
 	else
 		exit
 	fi
 else
 	echo -e "${GREEN}All of the requriments are satisfied. Starting to build the binary files.${NC}\n"
+fi
+
+
+declare -a missing_reqs=()
+check_all_reqs
+if [-z "${missing_reqs[@]}" ]
+then
+    echo -e "${GREEN}All of the missing requirements have been satisfied\nStarting to build boost${NC}\n\n"
+else
+    echo -e "${RED}ERROR: Falied to install these requirements: ${missing_reqs[@]}. Please try to install them yourself.\n\n"
 fi
 
 #boost
@@ -266,7 +367,6 @@ then
 	fi
 
 
-	inst_path="${inst_path/\~/$HOME}"
 	if [ -d "$inst_path" ]
 	then
 		echo -e "${GREEN}Installation directory exists.${NC}\n"	
