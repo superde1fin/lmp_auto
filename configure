@@ -288,7 +288,7 @@ if [-z "${missing_reqs[@]}" ]
 then
     echo -e "${GREEN}All of the missing requirements have been satisfied\nStarting to build boost${NC}\n\n"
 else
-    echo -e "${RED}ERROR: Falied to install these requirements: ${missing_reqs[@]}. Please try to install them yourself.\n\n"
+    echo -e "${RED}ERROR: Falied to install these requirements: ${missing_reqs[@]}. Please try to install them yourself.${NC}\n\n"
     exit
 fi
 
