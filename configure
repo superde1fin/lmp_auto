@@ -123,7 +123,7 @@ function check_all_reqs(){
     if $noroot
     then
         check_command "make"
-        if [ contains_string "python3 ${missing_reqs[@]}" ]
+        if [ $( contains_string "python3 ${missing_reqs[@]}" ) ]
         then
             check_cpplib "ffi"
             check_cpplib "zlib"
@@ -247,7 +247,7 @@ then
         echo -e "Starting the requirements' installation tool\n"
         if $noroot
         then
-            if [ contains_string "gcc" "${missing_reqs[@]}" ] || [ contains_string "wget" "${missing_reqs[@]}" ]
+            if [ $( contains_string "gcc" "${missing_reqs[@]}" ) ] || [ $( contains_string "wget" "${missing_reqs[@]}" ) ]
             then
                 echo -e "${RED}ERROR: Cannoot install gcc/wget without root privileges."
                 exit 1
