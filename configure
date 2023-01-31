@@ -249,7 +249,7 @@ then
         then
             if [ $( contains_string "gcc" "${missing_reqs[@]}" ) ] || [ $( contains_string "wget" "${missing_reqs[@]}" ) ]
             then
-                echo -e "${RED}ERROR: Cannoot install gcc/wget without root privileges."
+                echo -e "${RED}ERROR: Cannoot install gcc/wget without root privileges.${NC}"
                 exit 1
             fi
             if [ -f "install_noroot" ]
